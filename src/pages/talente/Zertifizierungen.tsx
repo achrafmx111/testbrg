@@ -1,0 +1,156 @@
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowRight, Award, CheckCircle, Shield, Globe, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+const certifications = [
+  {
+    title: 'SAP Certified Associate',
+    description: 'Einstiegszertifizierung für SAP-Grundlagen und Kernmodule.',
+    modules: ['S/4HANA', 'BW/4HANA', 'SuccessFactors', 'SAC'],
+    duration: '2-3 Monate Vorbereitung',
+  },
+  {
+    title: 'SAP Certified Specialist',
+    description: 'Vertiefte Expertise in spezifischen SAP-Bereichen.',
+    modules: ['Integration', 'BTP', 'Analytics', 'ABAP'],
+    duration: '4-6 Monate Vorbereitung',
+  },
+  {
+    title: 'SAP Certified Professional',
+    description: 'Höchste Zertifizierungsstufe für erfahrene SAP-Experten.',
+    modules: ['Solution Architect', 'Development', 'Security'],
+    duration: '6-12 Monate Vorbereitung',
+  },
+];
+
+const benefits = [
+  { icon: Shield, text: 'Offizielle SAP-Anerkennung' },
+  { icon: Globe, text: 'Internationale Gültigkeit' },
+  { icon: Star, text: 'Höhere Gehaltschancen' },
+  { icon: CheckCircle, text: 'Karrierevorteile' },
+];
+
+const Zertifizierungen = () => {
+  const { i18n } = useTranslation();
+  const isGerman = i18n.language === 'de';
+
+  return (
+    <>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden gradient-hero pattern-overlay">
+        <div className="container-custom section-padding">
+          <motion.div
+            className="max-w-4xl mx-auto text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <span className="inline-block px-4 py-2 mb-6 text-sm font-medium rounded-full bg-secondary/20 text-primary border border-secondary/30">
+              {isGerman ? 'Offizielle Zertifikate' : 'Official Certifications'}
+            </span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-foreground mb-6">
+              {isGerman ? 'SAP Zertifizierungen' : 'SAP Certifications'}
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              {isGerman 
+                ? 'Erwerben Sie anerkannte SAP-Zertifikate und öffnen Sie Türen zu internationalen Karrieremöglichkeiten.'
+                : 'Earn recognized SAP certifications and open doors to international career opportunities.'}
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Benefits */}
+      <section className="section-padding bg-muted/50">
+        <div className="container-custom">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {benefits.map((benefit, idx) => (
+              <motion.div
+                key={idx}
+                className="text-center p-6"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                <benefit.icon className="h-10 w-10 mx-auto mb-3 text-primary" />
+                <p className="font-medium">{benefit.text}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Certifications Grid */}
+      <section className="section-padding bg-background">
+        <div className="container-custom">
+          <div className="grid md:grid-cols-3 gap-8">
+            {certifications.map((cert, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                <Card className="h-full card-hover border-0 shadow-card">
+                  <CardHeader>
+                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                      <Award className="h-7 w-7 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl font-heading">{cert.title}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{cert.duration}</p>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">{cert.description}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {cert.modules.map((module, midx) => (
+                        <span 
+                          key={midx}
+                          className="px-3 py-1 text-xs font-medium rounded-full bg-muted text-muted-foreground"
+                        >
+                          {module}
+                        </span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="section-padding gradient-primary text-primary-foreground">
+        <div className="container-custom text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Award className="h-16 w-16 mx-auto mb-6 opacity-80" />
+            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
+              {isGerman ? 'Zertifizierung starten' : 'Start Your Certification'}
+            </h2>
+            <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
+              {isGerman 
+                ? 'Lassen Sie sich von uns auf Ihre SAP-Zertifizierung vorbereiten.'
+                : 'Let us prepare you for your SAP certification.'}
+            </p>
+            <Button asChild size="lg" variant="secondary" className="text-lg px-8">
+              <Link to="/contact">
+                {isGerman ? 'Beratung buchen' : 'Book Consultation'}
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+    </>
+  );
+};
+
+export default Zertifizierungen;

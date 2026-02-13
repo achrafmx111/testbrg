@@ -1,0 +1,331 @@
+{
+  "nav": {
+    "home": "Startseite",
+    "programs": "Programme",
+    "skillcore": "SkillCore",
+    "discoveryPlus": "Discovery+",
+    "talentflow": "TalentFlow",
+    "forCompanies": "Für Unternehmen",
+    "forPartners": "Für Partner",
+    "poweredByRealcore": "Powered by Realcore",
+    "about": "Über uns",
+    "blog": "Blog & Insights",
+    "contact": "Kontakt",
+    "getStarted": "Jetzt starten",
+    "bookCall": "Beratung buchen"
+  },
+  "hero": {
+    "badge": "Deutsche Exzellenz • Marokkanische Intelligenz",
+    "title": "Ihr Weg zu einer",
+    "titleHighlight": "Globalen SAP-Karriere",
+    "subtitle": "Professionelle SAP-Schulungen nach deutschen Standards. Immersive Lernerfahrungen. Strukturierte Karrierewege, die Talente mit dem internationalen Arbeitsmarkt verbinden.",
+    "slogan": "Made in Germany. Based in Morocco.",
+    "cta": "Programme entdecken",
+    "ctaSecondary": "Kontaktieren Sie uns",
+    "stats": {
+      "students": "30+",
+      "studentsLabel": "Experten-Mentoren",
+      "partners": "Global",
+      "partnersLabel": "Partnerunternehmen",
+      "placement": "99%",
+      "placementLabel": "Erfolgsquote",
+      "countries": "17+",
+      "countriesLabel": "Jahre Erfahrung"
+    }
+  },
+  "pillars": {
+    "title": "Drei Wege zum Erfolg",
+    "subtitle": "Umfassendes SAP-Ökosystem zur Transformation Ihrer Karriere",
+    "skillcore": {
+      "title": "SkillCore",
+      "tagline": "Training & Zertifizierung",
+      "description": "Bauen Sie starke SAP-Fähigkeiten mit deutschen Standards auf. Strukturierte Lernpfade, umfassende Zertifizierung und Praxiserfahrung.",
+      "features": ["Strukturierte Lernpfade", "SAP-Zertifizierungsvorbereitung", "Praktische Projekte", "Deutsche Methodik"],
+      "cta": "Kurse entdecken"
+    },
+    "discovery": {
+      "title": "Discovery+",
+      "tagline": "Training + Tourismus + Networking",
+      "description": "Immersive Premium-Erlebnisse, die VIP-SAP-Trainingsretreats in Marokko mit Networking-Möglichkeiten und kultureller Entdeckung verbinden.",
+      "features": ["VIP-Training-Retreats", "Executive-Networking", "Kulturelle Immersion", "Premium-Pakete"],
+      "cta": "Erlebnisse entdecken"
+    },
+    "talentflow": {
+      "title": "TalentFlow",
+      "tagline": "Talent, Vermittlung & Mobilität",
+      "description": "Verwandeln Sie Training in echte Karrieren. Jobvorbereitung, Talentpool-Zugang, Partnerunternehmen-Verbindungen und Visa-Beratung für Deutschland & EU.",
+      "features": ["Karrierevorbereitung", "Jobvermittlung", "Visa-Beratung", "Partnernetzwerk"],
+      "cta": "TalentFlow beitreten"
+    }
+  },
+  "features": {
+    "title": "Warum Bridging.Academy?",
+    "subtitle": "Deutsche Präzision trifft marokkanische Wärme in einem einzigartigen Lern-Ökosystem",
+    "germanStandards": {
+      "title": "Deutsche Standards",
+      "description": "Curriculum, das von deutschen SAP-Experten von Realcore Consulting entwickelt und validiert wurde."
+    },
+    "realProjects": {
+      "title": "Echte Projekte",
+      "description": "Lernen Sie von tatsächlichen SAP-Implementierungen, nicht nur Theorie. Praktische Erfahrung zählt."
+    },
+    "careerFocus": {
+      "title": "Karrierefokussiert",
+      "description": "Jedes Programm ist mit Ihrem Karriereziel im Blick konzipiert. Wir messen Erfolg an Vermittlungen."
+    },
+    "globalNetwork": {
+      "title": "Globales Netzwerk",
+      "description": "Verbinden Sie sich mit SAP-Profis, Unternehmen und Möglichkeiten in ganz Europa und darüber hinaus."
+    },
+    "multilingual": {
+      "title": "Mehrsprachiger Support",
+      "description": "Lernen Sie auf Englisch, Deutsch, Französisch oder Arabisch. Wir treffen Sie dort, wo Sie sind."
+    },
+    "certified": {
+      "title": "Zertifizierte Exzellenz",
+      "description": "Anerkannte Zertifizierungen, die Türen im internationalen SAP-Arbeitsmarkt öffnen."
+    }
+  },
+  "courses": {
+    "title": "SAP-Kurskatalog",
+    "subtitle": "Umfassende Lernpfade für jedes Karriereziel",
+    "filterBy": "Filtern nach",
+    "allModules": "Alle Module",
+    "allLevels": "Alle Stufen",
+    "allLanguages": "Alle Sprachen",
+    "searchPlaceholder": "Kurse suchen...",
+    "duration": "Dauer",
+    "level": "Stufe",
+    "language": "Sprache",
+    "beginner": "Anfänger",
+    "intermediate": "Fortgeschritten",
+    "advanced": "Experte",
+    "weeks": "Wochen",
+    "viewDetails": "Details ansehen",
+    "enroll": "Jetzt anmelden",
+    "categories": {
+      "basics": "SAP Grundlagen",
+      "core": "Core & Enterprise Module",
+      "btp": "SAP BTP & Integration",
+      "analytics": "Daten, Analytics & KI",
+      "development": "Entwicklung (ABAP, RAP, CAP)",
+      "transformation": "S/4HANA Transformation"
+    }
+  },
+  "testimonials": {
+    "title": "Erfolgsgeschichten",
+    "subtitle": "Hören Sie von unseren Absolventen, die ihre Karrieren transformiert haben"
+  },
+  "cta": {
+    "title": "Bereit, Ihre SAP-Reise zu starten?",
+    "subtitle": "Schließen Sie sich Tausenden von Fachleuten an, die ihre Karrieren durch Bridging.Academy transformiert haben.",
+    "button": "Heute starten",
+    "consultation": "Oder buchen Sie eine kostenlose Beratung"
+  },
+  "newsletter": {
+    "title": "Bleiben Sie informiert",
+    "subtitle": "Erhalten Sie die neuesten SAP-Einblicke, Karrieretipps und Akademie-Neuigkeiten.",
+    "placeholder": "Ihre E-Mail eingeben",
+    "button": "Abonnieren",
+    "privacy": "Wir respektieren Ihre Privatsphäre. Jederzeit abmelden."
+  },
+  "footer": {
+    "description": "Bridging.Academy verbindet Talente mit dem globalen SAP-Markt durch Training nach deutschen Standards und strukturierte Karrierewege.",
+    "programs": "Programme",
+    "company": "Unternehmen",
+    "support": "Support",
+    "legal": "Rechtliches",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "imprint": "Impressum",
+    "cookies": "Cookie-Richtlinie",
+    "faq": "FAQ",
+    "helpCenter": "Hilfezentrum",
+    "community": "Community",
+    "copyright": "© 2026 Bridging.Academy. Alle Rechte vorbehalten.",
+    "poweredBy": "Powered by Realcore"
+  },
+  "contact": {
+    "title": "Kontaktieren Sie uns",
+    "subtitle": "Haben Sie Fragen? Wir sind hier, um Ihnen bei Ihrem SAP-Weg zu helfen.",
+    "form": {
+      "name": "Vollständiger Name",
+      "email": "E-Mail-Adresse",
+      "phone": "Telefonnummer",
+      "subject": "Betreff",
+      "message": "Nachricht",
+      "submit": "Nachricht senden",
+      "success": "Nachricht erfolgreich gesendet!",
+      "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+    },
+    "info": {
+      "title": "Kontaktinformationen",
+      "email": "info@bridging.academy",
+      "phone": "+49 123 456 789",
+      "whatsapp": "WhatsApp-Support",
+      "address": "Marokko & Deutschland"
+    },
+    "booking": {
+      "title": "Beratung buchen",
+      "subtitle": "Vereinbaren Sie ein kostenloses 30-minütiges Gespräch mit unserem Team."
+    }
+  },
+  "about": {
+    "title": "Über Bridging.Academy",
+    "subtitle": "Talente mit Chancen durch deutsche Exzellenz verbinden",
+    "mission": {
+      "title": "Unsere Mission",
+      "description": "Erstklassige SAP-Ausbildung anzubieten, die arabischsprachige Fachkräfte befähigt, auf dem globalen Technologiemarkt erfolgreich zu sein, mit deutschen Standards und einer menschlichen Note."
+    },
+    "vision": {
+      "title": "Unsere Vision",
+      "description": "Eine Welt, in der geografische Grenzen das Karrierepotenzial nicht einschränken. Wo Talente aus Marokko und der MENA-Region gleichberechtigt auf der globalen SAP-Bühne konkurrieren."
+    },
+    "values": {
+      "title": "Unsere Werte",
+      "excellence": "Exzellenz",
+      "excellenceDesc": "Deutsche Präzision in allem, was wir tun",
+      "integrity": "Integrität",
+      "integrityDesc": "Ehrliche Beratung für jeden Studenten",
+      "innovation": "Innovation",
+      "innovationDesc": "Moderne Methoden für moderne Karrieren",
+      "community": "Gemeinschaft",
+      "communityDesc": "Gemeinsam erreichen wir mehr"
+    }
+  },
+  "realcore": {
+    "badge": "Strategische Partnerschaft",
+    "title": "Powered by Realcore",
+    "subtitle": "Deutsche SAP-Expertise für Ihren Erfolg",
+    "description": "Realcore ist eine führende deutsche SAP-Beratungsgruppe mit jahrzehntelanger Erfahrung in Unternehmenstransformationen. Ihre Expertise prägt unser Curriculum, unsere Methodik und unsere Branchenverbindungen.",
+    "features": {
+      "expertise": {
+        "title": "Tiefe SAP-Expertise",
+        "description": "20+ Jahre SAP-Beratungserfahrung branchenübergreifend"
+      },
+      "projects": {
+        "title": "Echte Projekterfahrung",
+        "description": "Curriculum basierend auf tatsächlichen Unternehmensimplementierungen"
+      },
+      "network": {
+        "title": "Branchennetzwerk",
+        "description": "Direkte Verbindungen zum deutschen und europäischen SAP-Markt"
+      },
+      "methodology": {
+        "title": "Deutsche Methodik",
+        "description": "Strukturierter, gründlicher Ansatz zur beruflichen Entwicklung"
+      }
+    },
+    "cta": "Mehr über Realcore erfahren"
+  },
+  "companies": {
+    "title": "Für Unternehmen",
+    "subtitle": "Partnerschaft für Talent, Training und SAP-Exzellenz",
+    "services": {
+      "training": {
+        "title": "Unternehmensschulungen",
+        "description": "Qualifizieren Sie Ihre Belegschaft mit maßgeschneiderten SAP-Schulungsprogrammen"
+      },
+      "talent": {
+        "title": "Talentplatzierung",
+        "description": "Zugang zu geprüften, geschulten SAP-Fachkräften für Ihre Projekte"
+      },
+      "nearshoring": {
+        "title": "Nearshoring",
+        "description": "Aufbau dedizierter SAP-Teams in Marokko mit deutschen Standards"
+      }
+    },
+    "cta": "Partner werden"
+  },
+  "partners": {
+    "title": "Für Partner",
+    "subtitle": "Erweitern Sie Ihre Reichweite durch strategische Zusammenarbeit",
+    "types": {
+      "training": {
+        "title": "Trainingszentren",
+        "description": "Lizenzieren Sie unser Curriculum und unsere Methodik für Ihre Institution"
+      },
+      "universities": {
+        "title": "Universitäten",
+        "description": "Integrieren Sie SAP-Training in akademische Programme"
+      },
+      "government": {
+        "title": "Regierungsprogramme",
+        "description": "Initiativen zur Arbeitskräfteentwicklung und Beschäftigungsprogramme"
+      }
+    },
+    "cta": "Partner werden"
+  },
+  "blog": {
+    "title": "Blog & Insights",
+    "subtitle": "Aktuelle Nachrichten, Trends und Karriereberatung im SAP-Ökosystem",
+    "categories": {
+      "all": "Alle",
+      "careers": "SAP-Karrieren",
+      "trends": "SAP-Trends",
+      "mobility": "Deutschland & Mobilität",
+      "news": "Akademie-News"
+    },
+    "readMore": "Weiterlesen",
+    "minRead": "Min. Lesezeit"
+  },
+  "community": {
+    "title": "Community beitreten",
+    "subtitle": "Verbinden Sie sich mit anderen SAP-Lernenden und Fachleuten",
+    "form": {
+      "name": "Vollständiger Name",
+      "email": "E-Mail",
+      "interest": "Interessensgebiet",
+      "submit": "Beitritt anfragen",
+      "success": "Anfrage gesendet! Wir melden uns bald."
+    }
+  },
+  "discovery": {
+    "hero": {
+      "badge": "Premium-Erlebnis",
+      "title": "SAP-Training trifft marokkanische Exzellenz",
+      "subtitle": "Immersive Lern-Retreats, die erstklassiges SAP-Training mit unvergesslichen kulturellen Erlebnissen in Marokko verbinden."
+    },
+    "packages": {
+      "executive": {
+        "title": "Executive",
+        "description": "Privates Training, Luxusunterkunft, exklusives Networking"
+      },
+      "professional": {
+        "title": "Professional",
+        "description": "Intensives Training, Premium-Hotel, geführte Erlebnisse"
+      },
+      "group": {
+        "title": "Gruppe",
+        "description": "Teamtraining, komfortable Unterkünfte, kollaboratives Lernen"
+      }
+    },
+    "cta": "Discovery+ anfragen"
+  },
+  "talentflow": {
+    "hero": {
+      "badge": "Karrierebeschleunigung",
+      "title": "Vom Training zur Karriere",
+      "subtitle": "Umfassende Karriereunterstützung, die Ihre SAP-Fähigkeiten in echte Jobchancen in Deutschland und Europa verwandelt."
+    },
+    "services": {
+      "cv": {
+        "title": "Deutscher Lebenslauf",
+        "description": "Professionelle Lebenslauferstellung nach deutschen Standards"
+      },
+      "interview": {
+        "title": "Interview-Vorbereitung",
+        "description": "Mock-Interviews und Coaching mit Branchenexperten"
+      },
+      "visa": {
+        "title": "Visa-Beratung",
+        "description": "Unterstützung für deutsches Arbeitsvisum und Umzug"
+      },
+      "placement": {
+        "title": "Jobvermittlung",
+        "description": "Direkter Zugang zu Partnerunternehmen und Möglichkeiten"
+      }
+    },
+    "cta": "TalentFlow beitreten"
+  }
+}

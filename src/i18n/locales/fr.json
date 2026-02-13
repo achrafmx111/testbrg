@@ -1,0 +1,331 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "programs": "Programmes",
+    "skillcore": "SkillCore",
+    "discoveryPlus": "Discovery+",
+    "talentflow": "TalentFlow",
+    "forCompanies": "Pour les Entreprises",
+    "forPartners": "Pour les Partenaires",
+    "poweredByRealcore": "Propulsé par Realcore",
+    "about": "À propos",
+    "blog": "Blog & Insights",
+    "contact": "Contact",
+    "getStarted": "Commencer",
+    "bookCall": "Réserver un appel"
+  },
+  "hero": {
+    "badge": "Excellence Allemande • Intelligence Marocaine",
+    "title": "Votre passerelle vers une",
+    "titleHighlight": "Carrière SAP Mondiale",
+    "subtitle": "Formation SAP professionnelle aux standards allemands. Expériences d'apprentissage immersives. Parcours de carrière structurés connectant les talents au marché international.",
+    "slogan": "Made in Germany. Based in Morocco.",
+    "cta": "Explorer les Programmes",
+    "ctaSecondary": "Contactez-nous",
+    "stats": {
+      "students": "30+",
+      "studentsLabel": "Mentors Experts",
+      "partners": "Mondial",
+      "partnersLabel": "Entreprises Partenaires",
+      "placement": "99%",
+      "placementLabel": "Taux de Réussite",
+      "countries": "17+",
+      "countriesLabel": "Années d'Expérience"
+    }
+  },
+  "pillars": {
+    "title": "Trois Voies vers le Succès",
+    "subtitle": "Écosystème SAP complet conçu pour transformer votre carrière",
+    "skillcore": {
+      "title": "SkillCore",
+      "tagline": "Formation & Certification",
+      "description": "Développez de solides compétences SAP aux standards allemands. Parcours de formation structurés, certification complète et expérience de projets réels.",
+      "features": ["Parcours d'Apprentissage Structurés", "Préparation à la Certification SAP", "Projets Pratiques", "Méthodologie Allemande"],
+      "cta": "Explorer les Cours"
+    },
+    "discovery": {
+      "title": "Discovery+",
+      "tagline": "Formation + Tourisme + Networking",
+      "description": "Expériences premium immersives combinant retraites VIP de formation SAP au Maroc avec opportunités de networking et découverte culturelle.",
+      "features": ["Retraites VIP de Formation", "Networking Exécutif", "Immersion Culturelle", "Forfaits Premium"],
+      "cta": "Découvrir les Expériences"
+    },
+    "talentflow": {
+      "title": "TalentFlow",
+      "tagline": "Talent, Placement & Mobilité",
+      "description": "Transformez la formation en vraies carrières. Préparation à l'emploi, accès au vivier de talents, connexions avec entreprises partenaires et conseils visa pour l'Allemagne & l'UE.",
+      "features": ["Préparation de Carrière", "Placement Professionnel", "Conseils Visa", "Réseau de Partenaires"],
+      "cta": "Rejoindre TalentFlow"
+    }
+  },
+  "features": {
+    "title": "Pourquoi Bridging.Academy?",
+    "subtitle": "La précision allemande rencontre la chaleur marocaine dans un écosystème d'apprentissage unique",
+    "germanStandards": {
+      "title": "Standards Allemands",
+      "description": "Programme conçu et validé par des experts SAP allemands de Realcore consulting."
+    },
+    "realProjects": {
+      "title": "Projets Réels",
+      "description": "Apprenez à partir d'implémentations SAP réelles, pas seulement de théorie. L'expérience pratique compte."
+    },
+    "careerFocus": {
+      "title": "Axé Carrière",
+      "description": "Chaque programme est conçu avec votre résultat de carrière en tête. Nous mesurons le succès par les placements."
+    },
+    "globalNetwork": {
+      "title": "Réseau Mondial",
+      "description": "Connectez-vous avec des professionnels SAP, des entreprises et des opportunités à travers l'Europe et au-delà."
+    },
+    "multilingual": {
+      "title": "Support Multilingue",
+      "description": "Apprenez en anglais, allemand, français ou arabe. Nous vous rejoignons là où vous êtes."
+    },
+    "certified": {
+      "title": "Excellence Certifiée",
+      "description": "Certifications reconnues qui ouvrent des portes sur le marché international de l'emploi SAP."
+    }
+  },
+  "courses": {
+    "title": "Catalogue de Cours SAP",
+    "subtitle": "Parcours de formation complets pour chaque objectif de carrière",
+    "filterBy": "Filtrer par",
+    "allModules": "Tous les Modules",
+    "allLevels": "Tous les Niveaux",
+    "allLanguages": "Toutes les Langues",
+    "searchPlaceholder": "Rechercher des cours...",
+    "duration": "Durée",
+    "level": "Niveau",
+    "language": "Langue",
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé",
+    "weeks": "semaines",
+    "viewDetails": "Voir les Détails",
+    "enroll": "S'inscrire",
+    "categories": {
+      "basics": "Fondamentaux SAP",
+      "core": "Modules Core & Enterprise",
+      "btp": "SAP BTP & Intégration",
+      "analytics": "Données, Analytics & IA",
+      "development": "Développement (ABAP, RAP, CAP)",
+      "transformation": "Transformation S/4HANA"
+    }
+  },
+  "testimonials": {
+    "title": "Histoires de Réussite",
+    "subtitle": "Écoutez nos diplômés qui ont transformé leurs carrières"
+  },
+  "cta": {
+    "title": "Prêt à Commencer Votre Parcours SAP?",
+    "subtitle": "Rejoignez des milliers de professionnels qui ont transformé leurs carrières grâce à Bridging.Academy.",
+    "button": "Commencer Aujourd'hui",
+    "consultation": "Ou réservez une consultation gratuite"
+  },
+  "newsletter": {
+    "title": "Restez Informé",
+    "subtitle": "Recevez les dernières actualités SAP, conseils carrière et nouvelles de l'académie.",
+    "placeholder": "Entrez votre email",
+    "button": "S'abonner",
+    "privacy": "Nous respectons votre vie privée. Désabonnez-vous à tout moment."
+  },
+  "footer": {
+    "description": "Bridging.Academy connecte les talents au marché SAP mondial grâce à une formation aux standards allemands et des parcours de carrière structurés.",
+    "programs": "Programmes",
+    "company": "Entreprise",
+    "support": "Support",
+    "legal": "Mentions Légales",
+    "privacy": "Politique de Confidentialité",
+    "terms": "Conditions d'Utilisation",
+    "imprint": "Mentions Légales",
+    "cookies": "Politique de Cookies",
+    "faq": "FAQ",
+    "helpCenter": "Centre d'Aide",
+    "community": "Communauté",
+    "copyright": "© 2026 Bridging.Academy. Tous droits réservés.",
+    "poweredBy": "Propulsé par Realcore"
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "subtitle": "Des questions? Nous sommes là pour vous aider à commencer votre parcours SAP.",
+    "form": {
+      "name": "Nom Complet",
+      "email": "Adresse Email",
+      "phone": "Numéro de Téléphone",
+      "subject": "Sujet",
+      "message": "Message",
+      "submit": "Envoyer le Message",
+      "success": "Message envoyé avec succès!",
+      "error": "Une erreur s'est produite. Veuillez réessayer."
+    },
+    "info": {
+      "title": "Informations de Contact",
+      "email": "info@bridging.academy",
+      "phone": "+49 123 456 789",
+      "whatsapp": "Support WhatsApp",
+      "address": "Maroc & Allemagne"
+    },
+    "booking": {
+      "title": "Réserver une Consultation",
+      "subtitle": "Planifiez un appel gratuit de 30 minutes avec notre équipe."
+    }
+  },
+  "about": {
+    "title": "À propos de Bridging.Academy",
+    "subtitle": "Connecter les talents aux opportunités grâce à l'excellence allemande",
+    "mission": {
+      "title": "Notre Mission",
+      "description": "Fournir une éducation SAP de classe mondiale qui permet aux professionnels arabophones de réussir sur le marché technologique mondial, avec des standards allemands et une touche humaine."
+    },
+    "vision": {
+      "title": "Notre Vision",
+      "description": "Un monde où les frontières géographiques ne limitent pas le potentiel de carrière. Où les talents du Maroc et de la région MENA rivalisent à égalité sur la scène SAP mondiale."
+    },
+    "values": {
+      "title": "Nos Valeurs",
+      "excellence": "Excellence",
+      "excellenceDesc": "Précision allemande dans tout ce que nous faisons",
+      "integrity": "Intégrité",
+      "integrityDesc": "Conseils honnêtes pour chaque étudiant",
+      "innovation": "Innovation",
+      "innovationDesc": "Méthodes modernes pour carrières modernes",
+      "community": "Communauté",
+      "communityDesc": "Ensemble, nous accomplissons plus"
+    }
+  },
+  "realcore": {
+    "badge": "Partenariat Stratégique",
+    "title": "Propulsé par Realcore",
+    "subtitle": "L'Expertise SAP Allemande pour Votre Succès",
+    "description": "Realcore est un groupe de conseil SAP allemand leader avec des décennies d'expérience dans les transformations d'entreprise. Leur expertise alimente notre programme, notre méthodologie et nos connexions industrielles.",
+    "features": {
+      "expertise": {
+        "title": "Expertise SAP Approfondie",
+        "description": "20+ ans d'expérience en conseil SAP dans tous les secteurs"
+      },
+      "projects": {
+        "title": "Expérience de Projets Réels",
+        "description": "Programme construit à partir d'implémentations d'entreprise réelles"
+      },
+      "network": {
+        "title": "Réseau Industriel",
+        "description": "Connexions directes au marché SAP allemand et européen"
+      },
+      "methodology": {
+        "title": "Méthodologie Allemande",
+        "description": "Approche structurée et approfondie du développement professionnel"
+      }
+    },
+    "cta": "En savoir plus sur Realcore"
+  },
+  "companies": {
+    "title": "Pour les Entreprises",
+    "subtitle": "Associez-vous à nous pour le talent, la formation et l'excellence SAP",
+    "services": {
+      "training": {
+        "title": "Formation d'Entreprise",
+        "description": "Montez en compétences vos équipes avec des programmes de formation SAP personnalisés"
+      },
+      "talent": {
+        "title": "Placement de Talents",
+        "description": "Accédez à des professionnels SAP pré-qualifiés et formés pour vos projets"
+      },
+      "nearshoring": {
+        "title": "Nearshoring",
+        "description": "Constituez des équipes SAP dédiées au Maroc avec des standards allemands"
+      }
+    },
+    "cta": "Devenir Partenaire"
+  },
+  "partners": {
+    "title": "Pour les Partenaires",
+    "subtitle": "Élargissez votre portée grâce à une collaboration stratégique",
+    "types": {
+      "training": {
+        "title": "Centres de Formation",
+        "description": "Licenciez notre programme et notre méthodologie pour votre institution"
+      },
+      "universities": {
+        "title": "Universités",
+        "description": "Intégrez la formation SAP dans les programmes académiques"
+      },
+      "government": {
+        "title": "Programmes Gouvernementaux",
+        "description": "Initiatives de développement de la main-d'œuvre et programmes d'emploi"
+      }
+    },
+    "cta": "Devenir Partenaire"
+  },
+  "blog": {
+    "title": "Blog & Insights",
+    "subtitle": "Dernières actualités, tendances et conseils carrière dans l'écosystème SAP",
+    "categories": {
+      "all": "Tout",
+      "careers": "Carrières SAP",
+      "trends": "Tendances SAP",
+      "mobility": "Allemagne & Mobilité",
+      "news": "Actualités de l'Académie"
+    },
+    "readMore": "Lire la Suite",
+    "minRead": "min de lecture"
+  },
+  "community": {
+    "title": "Rejoignez Notre Communauté",
+    "subtitle": "Connectez-vous avec d'autres apprenants et professionnels SAP",
+    "form": {
+      "name": "Nom Complet",
+      "email": "Email",
+      "interest": "Domaine d'Intérêt",
+      "submit": "Demander à Rejoindre",
+      "success": "Demande envoyée! Nous vous contacterons bientôt."
+    }
+  },
+  "discovery": {
+    "hero": {
+      "badge": "Expérience Premium",
+      "title": "La Formation SAP Rencontre l'Excellence Marocaine",
+      "subtitle": "Retraites d'apprentissage immersives combinant formation SAP de classe mondiale avec des expériences culturelles inoubliables au Maroc."
+    },
+    "packages": {
+      "executive": {
+        "title": "Executive",
+        "description": "Formation privée, hébergement de luxe, networking exclusif"
+      },
+      "professional": {
+        "title": "Professional",
+        "description": "Formation intensive, hôtel premium, expériences guidées"
+      },
+      "group": {
+        "title": "Groupe",
+        "description": "Formation d'équipe, séjours confortables, apprentissage collaboratif"
+      }
+    },
+    "cta": "Demander Discovery+"
+  },
+  "talentflow": {
+    "hero": {
+      "badge": "Accélération de Carrière",
+      "title": "De la Formation à la Carrière",
+      "subtitle": "Accompagnement carrière complet qui transforme vos compétences SAP en vraies opportunités d'emploi en Allemagne et en Europe."
+    },
+    "services": {
+      "cv": {
+        "title": "CV Style Allemand",
+        "description": "Préparation de CV professionnelle selon les standards allemands"
+      },
+      "interview": {
+        "title": "Préparation Entretien",
+        "description": "Simulations d'entretiens et coaching avec des experts du secteur"
+      },
+      "visa": {
+        "title": "Conseils Visa",
+        "description": "Accompagnement pour le visa de travail allemand et la relocalisation"
+      },
+      "placement": {
+        "title": "Placement Professionnel",
+        "description": "Accès direct aux entreprises partenaires et aux opportunités"
+      }
+    },
+    "cta": "Rejoindre TalentFlow"
+  }
+}

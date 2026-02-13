@@ -1,0 +1,16 @@
+project_id = "jnexgrwyjimsumcitgne"
+
+[functions.send-course-registration]
+verify_jwt = false
+
+[functions.send-contact-message]
+verify_jwt = false
+
+[functions.send-unified-contact]
+verify_jwt = false
+
+[functions.extract-skills]
+verify_jwt = false
+
+[functions.send-email]
+verify_jwt = false
