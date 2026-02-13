@@ -2,6 +2,17 @@
 
 This repo keeps the legacy app untouched and introduces an MVP layer backed by Supabase under `mvp.*` only.
 
+## Platform overview
+
+Vision: a vertical SAP Talent Acceleration and Placement platform connecting trained SAP professionals with European employers.
+
+Core flow: talent registers -> completes learning path -> becomes job-ready -> matched with companies -> interview -> placement.
+
+Roles:
+- ADMIN
+- TALENT
+- COMPANY
+
 ## What was added
 
 - MVP database migration in `supabase/migrations/20260213090000_mvp_schema_and_rls.sql`
