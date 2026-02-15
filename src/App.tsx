@@ -49,7 +49,7 @@ const AdminAnalyticsPage = lazy(() => import("./pages/mvp/admin/AdminAnalyticsPa
 const AdminSettingsPage = lazy(() => import("./pages/mvp/admin/AdminSettingsPage"));
 import { UnifiedDashboardLayout } from "./pages/dashboard/components/UnifiedDashboardLayout";
 import AdminSystemPage from "./pages/dashboard/admin/AdminSystemPage";
-import TalentLayout from "./pages/dashboard/talent/TalentLayout";
+const TalentLayout = lazy(() => import("./pages/dashboard/talent/TalentLayout"));
 const TalentHomePage = lazy(() => import("./pages/dashboard/talent/TalentHomePage"));
 const TalentLearningPage = lazy(() => import("./pages/mvp/talent/TalentLearningPage"));
 const TalentAssessmentsPage = lazy(() => import("./pages/mvp/talent/TalentAssessmentsPage"));
@@ -77,7 +77,6 @@ const CompanyJobsPage = lazy(() => import("./pages/mvp/company/CompanyJobsPage")
 const AdminWorkspace = lazy(() => import("./pages/dashboard/AdminWorkspace"));
 const CompanyWorkspace = lazy(() => import("./pages/dashboard/CompanyWorkspace"));
 const ExternalTalentDashboard = lazy(() => import("./pages/dashboard/ExternalTalentDashboard"));
-const TalentLayout = lazy(() => import("./pages/dashboard/talent/TalentLayout"));
 const TalentOverviewPage = lazy(() => import("./pages/dashboard/talent/TalentOverviewPage"));
 const TalentCoursesPage = lazy(() => import("./pages/dashboard/talent/TalentCoursesPage"));
 const TalentCourseDetailsPage = lazy(() => import("./pages/dashboard/talent/TalentCourseDetailsPage"));

@@ -15,33 +15,5 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) {
-            return;
-          }
-
-          if (id.includes("react") || id.includes("scheduler") || id.includes("react-router")) {
-            return "vendor-react";
-          }
-
-          if (id.includes("@radix-ui") || id.includes("class-variance-authority") || id.includes("lucide-react") || id.includes("framer-motion")) {
-            return "vendor-ui";
-          }
-
-          if (id.includes("recharts") || id.includes("d3-")) {
-            return "vendor-charts";
-          }
-
-          if (id.includes("@supabase") || id.includes("@tanstack")) {
-            return "vendor-data";
-          }
-
-          return "vendor-misc";
-        },
-      },
-    },
-  },
+  // Keep default Vite chunking for runtime stability across deployments.
 }));
