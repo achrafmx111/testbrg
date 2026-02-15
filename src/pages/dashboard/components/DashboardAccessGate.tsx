@@ -2,73 +2,57 @@ import { ReactNode, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-type Role = "admin" | "business" | "student" | "user";
+import { mvp, MvpRole } from "@/integrations/supabase/mvp";
 
 interface DashboardAccessGateProps {
-  allowedRoles: Role[];
-  requireTalentPoolRegistration?: boolean;
+  allowedRoles: MvpRole[];
   children: ReactNode;
 }
 
 export const DashboardAccessGate = ({
   allowedRoles,
-  requireTalentPoolRegistration = false,
   children,
 }: DashboardAccessGateProps) => {
   const [checking, setChecking] = useState(true);
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     const check = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
+        if (!mounted) return;
+
         if (!user) {
           setAllowed(false);
+          setChecking(false);
           return;
         }
 
-        const { data: profile } = await (supabase as any)
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
+        const profile = await mvp.getMyProfile(user.id);
 
-        const role = profile?.role as Role | undefined;
-        const isAdmin = role === "admin";
+        if (!mounted) return;
 
-        if (isAdmin) {
-          setAllowed(true);
-          return;
-        }
-
-        if (!role || !allowedRoles.includes(role)) {
+        if (!profile || !allowedRoles.includes(profile.role)) {
           setAllowed(false);
-          return;
+        } else {
+          setAllowed(true);
         }
-
-        if (requireTalentPoolRegistration) {
-          const { data } = await (supabase as any)
-            .from("applications")
-            .select("id")
-            .eq("user_id", user.id)
-            .eq("type", "talent_pool_registration")
-            .limit(1);
-
-          setAllowed((data || []).length > 0);
-          return;
-        }
-
-        setAllowed(true);
-      } catch {
-        setAllowed(false);
+      } catch (error) {
+        console.error("Access gate error:", error);
+        if (mounted) setAllowed(false);
       } finally {
-        setChecking(false);
+        if (mounted) setChecking(false);
       }
     };
 
     check();
-  }, [allowedRoles, requireTalentPoolRegistration]);
+
+    return () => {
+      mounted = false;
+    };
+  }, [allowedRoles]);
 
   if (checking) {
     return (
@@ -79,7 +63,7 @@ export const DashboardAccessGate = ({
   }
 
   if (!allowed) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;

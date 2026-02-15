@@ -52,13 +52,6 @@ serve(async (req) => {
             throw new Error("OPENROUTER_API_KEY not configured in Supabase.")
         }
 
-        // Since parsing PDF in Edge Functions is tricky without heavy deps, 
-        // we use a prompt that handles the "context" well.
-        // For now, we simulate text extraction or use simple metadata if needed.
-        // Ideally: const text = await parsePdf(fileData);
-
-        // [MVP] For now, we inform the AI what we have. 
-        // In a production scenario, we'd use a dedicated PDF parser service or library.
         const fileName = application.cv_path.split('/').pop();
 
         const prompt = `
@@ -74,8 +67,11 @@ serve(async (req) => {
       FORMAT YOUR RESPONSE AS VALID JSON:
       {
         "skills": [{"skill": "Skill Name", "level": "Expert/Intermediate/Beginner"}],
-        "summary": "Professional summary here..."
+        "summary": "Professional summary here...",
+        "readiness_score": 45
       }
+
+      readiness_score should be 0-100 based on how ready the applicant is for SAP roles.
     `;
 
         const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -83,8 +79,8 @@ serve(async (req) => {
             headers: {
                 'Authorization': `Bearer ${openRouterApiKey}`,
                 'Content-Type': 'application/json',
-                'HTTP-Referer': 'https://bridging-academy.com', // Optional
-                'X-Title': 'Bridging Academy AI', // Optional
+                'HTTP-Referer': 'https://bridging-academy.com',
+                'X-Title': 'Bridging Academy AI',
             },
             body: JSON.stringify({
                 model: 'google/gemini-2.0-flash-001',
@@ -106,11 +102,10 @@ serve(async (req) => {
         const rawContent = aiResult.choices[0].message.content;
         console.log("AI Raw Content:", rawContent);
 
-        // Remove markdown formatting if present
         const cleanContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
         const content = JSON.parse(cleanContent);
 
-        // 4. Update Application with real AI Results
+        // 4. Update public.applications with AI Results
         const { error: updateError } = await supabaseClient
             .from('applications')
             .update({
@@ -122,6 +117,26 @@ serve(async (req) => {
 
         if (updateError) {
             throw new Error(`Failed to update application: ${updateError.message}`)
+        }
+
+        // 5. Also update mvp.talent_profiles with AI skills (if user_id exists)
+        const talentUserId = application.user_id || application.id;
+        try {
+            const mvpSchema = supabaseClient.schema("mvp");
+            const skillNames = (content.skills || []).map((s: any) => s.skill || s);
+            const readinessScore = content.readiness_score || 40;
+
+            await mvpSchema
+                .from("talent_profiles")
+                .update({
+                    skills: skillNames,
+                    readiness_score: readinessScore,
+                })
+                .eq("user_id", talentUserId);
+
+            console.log("MVP talent_profiles updated with AI skills for:", talentUserId);
+        } catch (mvpErr) {
+            console.warn("MVP talent_profiles update skipped:", mvpErr);
         }
 
         return new Response(JSON.stringify({

@@ -127,6 +127,33 @@ export const RecruitmentMessagingModal = ({
     useEffect(() => {
         if (!isOpen) return;
         loadMessages();
+
+        if (!applicationId) return;
+
+        const channel = supabase
+            .channel(`public:recruitment_messages:${applicationId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'recruitment_messages',
+                    filter: `application_id=eq.${applicationId}`
+                },
+                (payload) => {
+                    const newMessage = payload.new as RecruitmentMessage;
+                    setMessages((prev) => {
+                        // Prevent duplicates
+                        if (prev.some(m => m.id === newMessage.id)) return prev;
+                        return [...prev, newMessage];
+                    });
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, applicationId]);
 

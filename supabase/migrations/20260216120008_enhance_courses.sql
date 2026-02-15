@@ -1,0 +1,3 @@
+ALTER TABLE mvp.courses ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE mvp.courses ADD COLUMN IF NOT EXISTS difficulty TEXT DEFAULT 'Beginner';
+ALTER TABLE mvp.courses ADD COLUMN IF NOT EXISTS duration TEXT DEFAULT '4 weeks';

@@ -29,39 +29,51 @@ const Login = lazy(() => import("./pages/auth/Login"));
 const Signup = lazy(() => import("./pages/auth/Signup"));
 const MvpRoleRedirect = lazy(() => import("./pages/mvp/MvpRoleRedirect"));
 const MvpRoleGuard = lazy(() => import("./pages/mvp/MvpRoleGuard").then((module) => ({ default: module.MvpRoleGuard })));
-const AdminLayout = lazy(() => import("./pages/mvp/admin/AdminLayout"));
+const AdminLayout = lazy(() => import("./pages/dashboard/admin/AdminLayout"));
 const AdminOverviewPage = lazy(() => import("./pages/mvp/admin/AdminOverviewPage"));
+const AdminSkillCoreDashboardPage = lazy(() => import("./pages/mvp/admin/AdminProgramDashboards").then((module) => ({ default: module.AdminSkillCoreDashboardPage })));
+const AdminDiscoveryDashboardPage = lazy(() => import("./pages/mvp/admin/AdminProgramDashboards").then((module) => ({ default: module.AdminDiscoveryDashboardPage })));
+const AdminTalentFlowDashboardPage = lazy(() => import("./pages/mvp/admin/AdminProgramDashboards").then((module) => ({ default: module.AdminTalentFlowDashboardPage })));
 const AdminTalentsPage = lazy(() => import("./pages/mvp/admin/AdminTalentsPage"));
 const AdminCompaniesPage = lazy(() => import("./pages/mvp/admin/AdminCompaniesPage"));
 const AdminJobsPage = lazy(() => import("./pages/mvp/admin/AdminJobsPage"));
 const AdminApplicationsPage = lazy(() => import("./pages/mvp/admin/AdminApplicationsPage"));
+const AdminInterviewsPage = lazy(() => import("./pages/dashboard/admin/AdminInterviewsPage"));
 const AdminAcademyPage = lazy(() => import("./pages/mvp/admin/AdminAcademyPage"));
 const AdminReadinessPage = lazy(() => import("./pages/mvp/admin/AdminReadinessPage"));
 const AdminPipelinePage = lazy(() => import("./pages/mvp/admin/AdminPipelinePage"));
-const AdminMessagingPage = lazy(() => import("./pages/mvp/admin/AdminMessagingPage"));
+const AdminMessagingPage = lazy(() => import("./pages/dashboard/admin/AdminMessagingPage"));
 const AdminFinancePage = lazy(() => import("./pages/mvp/admin/AdminFinancePage"));
 const AdminSupportPage = lazy(() => import("./pages/mvp/admin/AdminSupportPage"));
 const AdminAnalyticsPage = lazy(() => import("./pages/mvp/admin/AdminAnalyticsPage"));
 const AdminSettingsPage = lazy(() => import("./pages/mvp/admin/AdminSettingsPage"));
-const TalentMvpLayout = lazy(() => import("./pages/mvp/talent/TalentLayout"));
-const TalentHomePage = lazy(() => import("./pages/mvp/talent/TalentHomePage"));
+import { UnifiedDashboardLayout } from "./pages/dashboard/components/UnifiedDashboardLayout";
+import AdminSystemPage from "./pages/dashboard/admin/AdminSystemPage";
+import TalentLayout from "./pages/dashboard/talent/TalentLayout";
+const TalentHomePage = lazy(() => import("./pages/dashboard/talent/TalentHomePage"));
 const TalentLearningPage = lazy(() => import("./pages/mvp/talent/TalentLearningPage"));
 const TalentAssessmentsPage = lazy(() => import("./pages/mvp/talent/TalentAssessmentsPage"));
-const TalentMvpProfilePage = lazy(() => import("./pages/mvp/talent/TalentProfilePage"));
+const TalentMvpProfilePage = lazy(() => import("./pages/dashboard/talent/TalentProfilePage"));
+// Alias for cleaner usage in new routes
+const TalentProfilePage = TalentMvpProfilePage;
 const TalentJobsPage = lazy(() => import("./pages/mvp/talent/TalentJobsPage"));
 const TalentApplicationsPage = lazy(() => import("./pages/mvp/talent/TalentApplicationsPage"));
 const TalentCoachingPage = lazy(() => import("./pages/mvp/talent/TalentCoachingPage"));
+const TalentCoachPage = lazy(() => import("./pages/dashboard/talent/TalentCoachPage"));
+const ResumeAnalysisPage = lazy(() => import("./pages/dashboard/talent/ResumeAnalysisPage"));
+const TalentRoadmapPage = lazy(() => import("./pages/dashboard/talent/TalentRoadmapPage"));
 const TalentMessagesPage = lazy(() => import("./pages/mvp/talent/TalentMessagesPage"));
 const TalentAlumniPage = lazy(() => import("./pages/mvp/talent/TalentAlumniPage"));
-const CompanyLayout = lazy(() => import("./pages/mvp/company/CompanyLayout"));
-const CompanyHomePage = lazy(() => import("./pages/mvp/company/CompanyHomePage"));
-const CompanyProfilePage = lazy(() => import("./pages/mvp/company/CompanyProfilePage"));
-const CompanyJobsPage = lazy(() => import("./pages/mvp/company/CompanyJobsPage"));
+const CompanyLayout = lazy(() => import("./pages/dashboard/company/CompanyLayout"));
+// Renamed to avoid potential conflict
+const CompanyHome = lazy(() => import("./pages/mvp/company/CompanyHomePage"));
 const CompanyTalentPoolPage = lazy(() => import("./pages/mvp/company/CompanyTalentPoolPage"));
-const CompanyApplicantsPage = lazy(() => import("./pages/mvp/company/CompanyApplicantsPage"));
+const CompanyApplicantsPage = lazy(() => import("./pages/dashboard/company/CompanyApplicantsPage"));
 const CompanyOffersPage = lazy(() => import("./pages/mvp/company/CompanyOffersPage"));
 const CompanyBillingPage = lazy(() => import("./pages/mvp/company/CompanyBillingPage"));
 const CompanyMessagesPage = lazy(() => import("./pages/mvp/company/CompanyMessagesPage"));
+const CompanyProfilePage = lazy(() => import("./pages/mvp/company/CompanyProfilePage"));
+const CompanyJobsPage = lazy(() => import("./pages/mvp/company/CompanyJobsPage"));
 const AdminWorkspace = lazy(() => import("./pages/dashboard/AdminWorkspace"));
 const CompanyWorkspace = lazy(() => import("./pages/dashboard/CompanyWorkspace"));
 const ExternalTalentDashboard = lazy(() => import("./pages/dashboard/ExternalTalentDashboard"));
@@ -123,12 +135,12 @@ const App = () => (
             <Route path="/contact" element={<Navigate to="/contactus" replace />} />
             <Route path="/apply" element={withLayout(<Apply />)} />
             <Route path="/talent-pool" element={withLayout(<TalentPoolPage />)} />
-            <Route path="/talent/:id" element={withLayout(<TalentProfile />)} />
+            <Route path="/profile/:id" element={withLayout(<TalentProfile />)} />
 
             {/* About sub-pages */}
             <Route path="/about/vision" element={withLayout(<Vision />)} />
             <Route path="/about/values" element={withLayout(<Values />)} />
-              {/* Redirects to canonical URLs */}
+            {/* Redirects to canonical URLs */}
             <Route path="/about/skillcore" element={withLayout(<SkillCoreRedirect />)} />
             <Route path="/about/discovery" element={withLayout(<DiscoveryRedirect />)} />
             <Route path="/about/talentflow" element={withLayout(<TalentFlowRedirect />)} />
@@ -168,10 +180,14 @@ const App = () => (
               }
             >
               <Route index element={<AdminOverviewPage />} />
+              <Route path="skillcore" element={<AdminSkillCoreDashboardPage />} />
+              <Route path="discovery" element={<AdminDiscoveryDashboardPage />} />
+              <Route path="talentflow" element={<AdminTalentFlowDashboardPage />} />
               <Route path="talents" element={<AdminTalentsPage />} />
               <Route path="companies" element={<AdminCompaniesPage />} />
               <Route path="jobs" element={<AdminJobsPage />} />
               <Route path="applications" element={<AdminApplicationsPage />} />
+              <Route path="interviews" element={<AdminInterviewsPage />} />
               <Route path="academy" element={<AdminAcademyPage />} />
               <Route path="readiness" element={<AdminReadinessPage />} />
               <Route path="pipeline" element={<AdminPipelinePage />} />
@@ -186,7 +202,7 @@ const App = () => (
               path="/talent"
               element={
                 <MvpRoleGuard role="TALENT">
-                  <TalentMvpLayout />
+                  <TalentLayout />
                 </MvpRoleGuard>
               }
             >
@@ -197,6 +213,9 @@ const App = () => (
               <Route path="jobs" element={<TalentJobsPage />} />
               <Route path="applications" element={<TalentApplicationsPage />} />
               <Route path="coaching" element={<TalentCoachingPage />} />
+              <Route path="coach" element={<TalentCoachPage />} />
+              <Route path="resume-analysis" element={<ResumeAnalysisPage />} />
+              <Route path="roadmap" element={<TalentRoadmapPage />} />
               <Route path="messages" element={<TalentMessagesPage />} />
               <Route path="alumni" element={<TalentAlumniPage />} />
             </Route>
@@ -209,7 +228,7 @@ const App = () => (
                 </MvpRoleGuard>
               }
             >
-              <Route index element={<CompanyHomePage />} />
+              <Route index element={<CompanyHome />} />
               <Route path="profile" element={<CompanyProfilePage />} />
               <Route path="jobs" element={<CompanyJobsPage />} />
               <Route path="talent-pool" element={<CompanyTalentPoolPage />} />
@@ -219,40 +238,72 @@ const App = () => (
               <Route path="messages" element={<CompanyMessagesPage />} />
             </Route>
 
-            {/* Role-based dashboard area */}
+            {/* NEW: Unified Dashboard Layout */}
             <Route
-              path="/dashboard/talent"
+              path="/dashboard"
               element={
-                <DashboardAccessGate allowedRoles={["user", "student"]}>
-                  <TalentLayout />
+                <DashboardAccessGate allowedRoles={["TALENT", "COMPANY", "ADMIN"] as any}>
+                  <UnifiedDashboardLayout />
                 </DashboardAccessGate>
               }
             >
-              <Route index element={<TalentOverviewPage />} />
-              <Route path="courses" element={<TalentCoursesPage />} />
-              <Route path="courses/:courseId" element={<TalentCourseDetailsPage />} />
-              <Route path="course-details" element={<TalentCourseDetailsEntryPage />} />
+              <Route index element={<Navigate to="talent" replace />} />
+
+              {/* Talent Routes */}
+              <Route path="talent">
+                <Route index element={<TalentHomePage />} />
+                <Route path="profile" element={<TalentProfilePage />} />
+                <Route path="learning" element={<TalentLearningPage />} />
+                <Route path="applications" element={<TalentApplicationsPage />} />
+                <Route path="roadmap" element={<TalentRoadmapPage />} />
+                <Route path="assessments" element={<TalentAssessmentsPage />} />
+                <Route path="coaching" element={<TalentCoachingPage />} />
+                <Route path="coach" element={<TalentCoachPage />} />
+                <Route path="resume-analysis" element={<ResumeAnalysisPage />} />
+                <Route path="jobs" element={<TalentJobsPage />} />
+                <Route path="messages" element={<TalentMessagesPage />} />
+              </Route>
+
+              {/* Company Routes */}
+              <Route path="company">
+                <Route index element={<CompanyHome />} />
+                <Route path="talent-pool" element={<CompanyTalentPoolPage />} />
+                <Route path="applications" element={<CompanyApplicantsPage />} />
+              </Route>
+
+              {/* Admin Routes - Nested under Unified Layout */}
+              <Route
+                path="admin"
+                element={
+                  <DashboardAccessGate allowedRoles={["admin"] as any}>
+                    <AdminLayout />
+                  </DashboardAccessGate>
+                }
+              >
+                <Route index element={<AdminOverviewPage />} />
+                <Route path="skillcore" element={<AdminSkillCoreDashboardPage />} />
+                <Route path="discovery" element={<AdminDiscoveryDashboardPage />} />
+                <Route path="talentflow" element={<AdminTalentFlowDashboardPage />} />
+                <Route path="talents" element={<AdminTalentsPage />} />
+                <Route path="companies" element={<AdminCompaniesPage />} />
+                <Route path="jobs" element={<AdminJobsPage />} />
+                <Route path="applications" element={<AdminApplicationsPage />} />
+                <Route path="interviews" element={<AdminInterviewsPage />} />
+                <Route path="academy" element={<AdminAcademyPage />} />
+                <Route path="readiness" element={<AdminReadinessPage />} />
+                <Route path="pipeline" element={<AdminPipelinePage />} />
+                <Route path="messaging" element={<AdminMessagingPage />} />
+                <Route path="finance" element={<AdminFinancePage />} />
+                <Route path="support" element={<AdminSupportPage />} />
+                <Route path="analytics" element={<AdminAnalyticsPage />} />
+                <Route path="settings" element={<AdminSettingsPage />} />
+                <Route path="system" element={<AdminSystemPage />} />
+              </Route>
             </Route>
-            <Route
-              path="/dashboard/company"
-              element={
-                <DashboardAccessGate allowedRoles={["business"]}>
-                  <CompanyWorkspace />
-                </DashboardAccessGate>
-              }
-            />
-            <Route
-              path="/dashboard/admin"
-              element={
-                <DashboardAccessGate allowedRoles={["admin"]}>
-                  <AdminWorkspace />
-                </DashboardAccessGate>
-              }
-            />
             <Route
               path="/dashboard/talent-external"
               element={
-                <DashboardAccessGate allowedRoles={["user", "student"]} requireTalentPoolRegistration>
+                <DashboardAccessGate allowedRoles={["TALENT"] as any}>
                   <ExternalTalentDashboard />
                 </DashboardAccessGate>
               }

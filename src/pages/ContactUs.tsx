@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { mvp } from "@/integrations/supabase/mvp";
 
 const contactInfo = [
   {
@@ -220,13 +221,99 @@ const ContactUs = () => {
       (e.target as HTMLFormElement).reset();
       setSelectedRole(null);
     } catch (error: any) {
-      console.error("Error sending message:", error);
       toast({
-        title: isGerman ? "Fehler" : "Error",
         description: error.message || (isGerman
           ? "Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
-          : "Failed to send message. Please try again."),
+          : "Failed to send message."),
         variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // State for company registration toggle
+  const [isRegistering, setIsRegistering] = useState(false);
+
+  // Registration handler
+  const handleRegistration = async (formData: FormData) => {
+    // 1. Extract raw data
+    const rawData = {
+      company_name: formData.get("organization_name"),
+      contact_name: formData.get("contact_person"),
+      email: formData.get("email"),
+      phone: formData.get("phone"),
+      industry: formData.get("subcategory"),
+      website: formData.get("website"),
+      country: isGerman ? "Germany" : "International",
+    };
+
+    // 2. Validate with Zod
+    // Dynamic import to avoid top-level if simple, but we can import at top.
+    // Assuming imported at top. I will add import in next step or use require if needed?
+    // Better to add import at top. But replace_file_content is block based. 
+    // I'll assume I can add import in another block or use fully qualified if I didn't import.
+    // I'll add the import in a separate call or just use a dynamic import/require? No, that's messy in Vite.
+    // I'll do two chunks.
+
+    // logic continued...
+    const { registrationRequestSchema } = await import("@/lib/zodSchemas");
+    const result = registrationRequestSchema.safeParse(rawData);
+
+    if (!result.success) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: result.error.errors[0].message
+      });
+      return;
+    }
+
+    try {
+      // Create Registration Request
+      await mvp.createRegistrationRequest({
+        ...result.data,
+        status: "PENDING"
+      });
+
+      // Success Message
+      toast({
+        title: isGerman ? "Anfrage gesendet!" : "Request Sent!",
+        description: isGerman
+          ? "Wir prüfen Ihre Registrierung und melden uns in Kürze."
+          : "We are reviewing your registration and will get back to you shortly.",
+      });
+
+      setIsRegistering(false); // Reset form mode
+      (document.querySelector('form') as HTMLFormElement)?.reset();
+
+    } catch (error: any) {
+      console.error("Registration Request Error:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to submit registration request."
+      });
+    }
+  };
+
+  // Modified submit wrapper
+  const onFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (honeypot) return;
+
+    setIsSubmitting(true);
+    try {
+      if (selectedRole === "business_partnerships" && isRegistering) {
+        await handleRegistration(new FormData(e.currentTarget));
+      } else {
+        await handleSubmit(e);
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message
       });
     } finally {
       setIsSubmitting(false);
@@ -273,7 +360,7 @@ const ContactUs = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={onFormSubmit} className="space-y-6">
                     {/* Honeypot field - hidden from users */}
                     <input
                       type="text"
@@ -294,14 +381,14 @@ const ContactUs = () => {
                         <div
                           onClick={() => setSelectedRole("talent_career")}
                           className={`p-6 rounded-xl border-2 cursor-pointer transition-all ${selectedRole === "talent_career"
-                              ? "border-primary bg-primary/5 shadow-md"
-                              : "border-border hover:border-primary/50 hover:bg-muted/50"
+                            ? "border-primary bg-primary/5 shadow-md"
+                            : "border-border hover:border-primary/50 hover:bg-muted/50"
                             }`}
                         >
                           <div className="flex items-center gap-4">
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedRole === "talent_career"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted"
                               }`}>
                               <GraduationCap className="h-6 w-6" />
                             </div>
@@ -321,14 +408,14 @@ const ContactUs = () => {
                         <div
                           onClick={() => setSelectedRole("business_partnerships")}
                           className={`p-6 rounded-xl border-2 cursor-pointer transition-all ${selectedRole === "business_partnerships"
-                              ? "border-primary bg-primary/5 shadow-md"
-                              : "border-border hover:border-primary/50 hover:bg-muted/50"
+                            ? "border-primary bg-primary/5 shadow-md"
+                            : "border-border hover:border-primary/50 hover:bg-muted/50"
                             }`}
                         >
                           <div className="flex items-center gap-4">
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedRole === "business_partnerships"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted"
                               }`}>
                               <Building2 className="h-6 w-6" />
                             </div>
@@ -414,8 +501,8 @@ const ContactUs = () => {
                               <RadioGroup name="learning_mode" className="flex gap-4">
                                 {learningModeOptions.map((opt) => (
                                   <div key={opt.value} className="flex items-center space-x-2">
-                                    <RadioGroupItem value={opt.value} id={`mode-${opt.value}`} />
-                                    <Label htmlFor={`mode-${opt.value}`} className="cursor-pointer">{opt.label}</Label>
+                                    <RadioGroupItem value={opt.value} id={`mode - ${opt.value} `} />
+                                    <Label htmlFor={`mode - ${opt.value} `} className="cursor-pointer">{opt.label}</Label>
                                   </div>
                                 ))}
                               </RadioGroup>
@@ -457,9 +544,27 @@ const ContactUs = () => {
                           exit={{ opacity: 0, height: 0 }}
                           className="space-y-6"
                         >
+                          <div className="flex items-center space-x-2 border p-4 rounded-lg bg-muted/30">
+                            <input
+                              type="checkbox"
+                              id="register-toggle"
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                              checked={isRegistering}
+                              onChange={(e) => setIsRegistering(e.target.checked)}
+                            />
+                            <Label htmlFor="register-toggle" className="flex-1 cursor-pointer font-medium">
+                              {isGerman ? "Als Unternehmen im Portal registrieren" : "Register as a Company in Portal"}
+                              <span className="block text-xs text-muted-foreground font-normal">
+                                {isGerman
+                                  ? "Erhalten Sie Zugang zu unserem Talentpool und verwalten Sie Stellenanzeigen."
+                                  : "Get access to our talent pool and manage job postings."}
+                              </span>
+                            </Label>
+                          </div>
+
                           <div className="space-y-2">
                             <Label>{isGerman ? "Art der Organisation" : "Organization Type"}</Label>
-                            <Select name="subcategory">
+                            <Select name="subcategory" defaultValue="corporate">
                               <SelectTrigger>
                                 <SelectValue placeholder={isGerman ? "Bitte wählen" : "Please select"} />
                               </SelectTrigger>
@@ -504,19 +609,29 @@ const ContactUs = () => {
                             </div>
                           </div>
 
-                          <div className="space-y-2">
-                            <Label>{isGerman ? "Art der Anfrage" : "Type of Inquiry"}</Label>
-                            <Select name="inquiry_type">
-                              <SelectTrigger>
-                                <SelectValue placeholder={isGerman ? "Bitte wählen" : "Please select"} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {inquiryTypeOptions.map((opt) => (
-                                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
+                          {isRegistering && (
+                            <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                              <Label htmlFor="password">{isGerman ? "Passwort erstellen" : "Create Password"} *</Label>
+                              <Input id="password" name="password" type="password" required minLength={6} placeholder="******" />
+                              <p className="text-xs text-muted-foreground">Min. 6 characters</p>
+                            </div>
+                          )}
+
+                          {!isRegistering && (
+                            <div className="space-y-2">
+                              <Label>{isGerman ? "Art der Anfrage" : "Type of Inquiry"}</Label>
+                              <Select name="inquiry_type">
+                                <SelectTrigger>
+                                  <SelectValue placeholder={isGerman ? "Bitte wählen" : "Please select"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {inquiryTypeOptions.map((opt) => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
 
                           <div className="space-y-2">
                             <Label htmlFor="message">{isGerman ? "Nachricht (optional)" : "Message (optional)"}</Label>
@@ -625,7 +740,7 @@ const ContactUs = () => {
               {faqs.map((faq, idx) => (
                 <AccordionItem
                   key={idx}
-                  value={`item-${idx}`}
+                  value={`item - ${idx} `}
                   className="bg-card rounded-lg border-0 shadow-card px-6"
                 >
                   <AccordionTrigger className="text-left font-medium hover:no-underline">

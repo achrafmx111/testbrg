@@ -9,6 +9,8 @@ import { Loader2, MapPin, Linkedin, Github, Globe, Sparkles } from "lucide-react
 import { supabase } from "@/integrations/supabase/client";
 import { Profile, Application } from "@/types";
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 const TalentProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -22,7 +24,17 @@ const TalentProfile = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!id) return;
+      if (!id) {
+        setLoading(false);
+        return;
+      }
+
+      if (!UUID_REGEX.test(id)) {
+        setProfile(null);
+        setLatestApplication(null);
+        setLoading(false);
+        return;
+      }
 
       setLoading(true);
 

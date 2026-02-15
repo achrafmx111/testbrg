@@ -95,14 +95,56 @@ const TalentPoolPage = () => {
           cv_path: cvPath,
           passport_path: passportPath,
           cert_path: certPath,
-          german_level: formData.get("german_level") as string,
-          sap_track: formData.get("sap_track") as string,
-          experience_years: parseInt(formData.get("experience") as string || "0")
+          // german_level: formData.get("german_level") as string,
+          // sap_track: formData.get("sap_track") as string,
+          // experience_years: parseInt(formData.get("experience") as string || "0")
         })
         .select()
         .single();
 
       if (dbError) throw dbError;
+
+      // 2b. Also write to MVP schema so talent appears in Admin dashboard
+      if (application) {
+        // Determine user_id: either from auth or use the application id as fallback
+        const talentUserId = user?.id || application.id;
+
+        // Create mvp.profiles entry
+        try {
+          const mvpSchema = (supabase as any).schema("mvp");
+          await mvpSchema.from("profiles").upsert({
+            id: talentUserId,
+            role: "TALENT",
+          }, { onConflict: "id" });
+
+          // Parse form fields for talent profile
+          const germanLevel = formData.get("german_level") as string || "none";
+          const sapTrack = formData.get("sap_track") as string || "other";
+          const experience = parseInt(formData.get("experience") as string || "0");
+
+          // Build initial skills from SAP track + german level
+          const initialSkills: string[] = [];
+          if (sapTrack && sapTrack !== "other") initialSkills.push(`SAP ${sapTrack}`);
+          const initialLanguages: string[] = ["English"];
+          if (germanLevel && germanLevel !== "none") initialLanguages.push(`German (${germanLevel})`);
+
+          await mvpSchema.from("talent_profiles").upsert({
+            user_id: talentUserId,
+            bio: formData.get("message") as string || null,
+            skills: initialSkills,
+            languages: initialLanguages,
+            readiness_score: Math.min(experience * 10, 60), // Initial score from experience
+            coach_rating: 0,
+            availability: true,
+            placement_status: "LEARNING",
+          }, { onConflict: "user_id" });
+
+          console.log("MVP talent profile created for:", talentUserId);
+        } catch (mvpErr: any) {
+          console.warn("MVP profile write skipped:", mvpErr?.message);
+          // Non-blocking: don't fail the whole registration
+        }
+      }
 
       // 3. Send Confirmation Email & Notify Admin
       if (application) {

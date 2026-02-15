@@ -1,36 +1,48 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { mvp, roleHomePath } from "@/integrations/supabase/mvp";
 
 export default function MvpRoleRedirect() {
-  const [path, setPath] = useState<string | null>(null);
+  const [targetPath, setTargetPath] = useState<string | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
+    let mounted = true;
     const run = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) {
-        setPath("/login");
-        return;
+        if (!mounted) return;
+
+        if (!user) {
+          setTargetPath("/login");
+          return;
+        }
+
+        const profile = await mvp.getMyProfile(user.id);
+
+        if (!mounted) return;
+
+        if (!profile) {
+          setTargetPath("/login");
+          return;
+        }
+
+        const home = roleHomePath(profile.role);
+        setTargetPath(home);
+
+      } catch {
+        if (mounted) setTargetPath("/login");
       }
-
-      const profile = await mvp.getMyProfile(user.id);
-      if (!profile) {
-        setPath("/login");
-        return;
-      }
-
-      setPath(roleHomePath(profile.role));
     };
 
-    run().catch(() => setPath("/login"));
+    run();
+    return () => { mounted = false; };
   }, []);
 
-  if (!path) {
+  if (!targetPath) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -38,5 +50,10 @@ export default function MvpRoleRedirect() {
     );
   }
 
-  return <Navigate to={path} replace />;
+  // Prevent redirect if we are already at the target path
+  if (location.pathname === targetPath) {
+    return null; // Render nothing or dashboard content if applicable
+  }
+
+  return <Navigate to={targetPath} replace />;
 }

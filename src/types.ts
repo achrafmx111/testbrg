@@ -118,15 +118,26 @@ export type InterviewStatus =
 
 export interface InterviewRequest {
     id: string;
-    employer_id: string;
+    employer_id: string; // Added back to match DB
+    company_id?: string;
+    recruiter_id?: string;
+    talent_id?: string;
     application_id: string;
     status: InterviewStatus;
-    notes?: string;
-    proposed_dates?: string[]; // ISO strings
-    admin_notes?: string;
+    message?: string;
+    proposed_times?: string[]; // JSON array of ISO strings
+    confirmed_time?: string;
+    meeting_link?: string;
     created_at: string;
     updated_at: string;
+
+    // Relations (joined)
+    application?: Application;
+    company?: { name: string; logo_url?: string };
+    talent?: Profile;
+    recruiter?: Profile;
 }
+
 // Phase 7: Education & Gamification Types
 export interface Course {
     id: string;

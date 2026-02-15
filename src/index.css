@@ -189,6 +189,99 @@
   .pattern-overlay {
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231e3a5f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
+
+  .dashboard-content-grid {
+    @apply space-y-6;
+  }
+
+  .dashboard-content-grid > * {
+    animation: slideUp 0.35s ease-out both;
+  }
+
+  .dashboard-main[data-dashboard-context="skillcore"] .dashboard-content-grid > * {
+    @apply border-primary/20;
+  }
+
+  .dashboard-main[data-dashboard-context="skillcore"] .dashboard-content-grid > * .text-primary {
+    color: hsl(var(--primary));
+  }
+
+  .dashboard-main[data-dashboard-context="discovery"] .dashboard-content-grid > * {
+    @apply border-secondary/25;
+  }
+
+  .dashboard-main[data-dashboard-context="discovery"] .dashboard-content-grid > * .text-primary {
+    color: hsl(var(--secondary-foreground));
+  }
+
+  .dashboard-main[data-dashboard-context="talentflow"] .dashboard-content-grid > * {
+    @apply border-accent/25;
+  }
+
+  .dashboard-main[data-dashboard-context="talentflow"] .dashboard-content-grid > * .text-primary {
+    color: hsl(var(--accent-foreground));
+  }
+
+  .dashboard-main[data-dashboard-context="talent"] .dashboard-content-grid > * {
+    @apply border-primary/20 bg-gradient-to-b from-card to-primary/5;
+  }
+
+  .dashboard-main[data-dashboard-context="company"] .dashboard-content-grid > * {
+    @apply border-secondary/25 bg-gradient-to-b from-card to-secondary/10;
+  }
+
+  .dashboard-main[data-dashboard-context="applications"] .dashboard-content-grid > * {
+    @apply border-accent/25 bg-gradient-to-b from-card to-accent/10;
+  }
+
+  .dashboard-main[data-dashboard-context="talent"] .dashboard-content-grid .rounded-xl,
+  .dashboard-main[data-dashboard-context="talent"] .dashboard-content-grid .rounded-2xl {
+    @apply border-primary/20;
+  }
+
+  .dashboard-main[data-dashboard-context="talent"] .dashboard-content-grid .bg-muted\/10 {
+    background-color: hsl(var(--primary) / 0.06);
+  }
+
+  .dashboard-main[data-dashboard-context="company"] .dashboard-content-grid .rounded-xl,
+  .dashboard-main[data-dashboard-context="company"] .dashboard-content-grid .rounded-2xl {
+    @apply border-secondary/25;
+  }
+
+  .dashboard-main[data-dashboard-context="company"] .dashboard-content-grid .bg-muted\/10 {
+    background-color: hsl(var(--secondary) / 0.1);
+  }
+
+  .dashboard-main[data-dashboard-context="applications"] .dashboard-content-grid .rounded-xl,
+  .dashboard-main[data-dashboard-context="applications"] .dashboard-content-grid .rounded-2xl {
+    @apply border-accent/25;
+  }
+
+  .dashboard-main[data-dashboard-context="applications"] .dashboard-content-grid table thead {
+    background-color: hsl(var(--accent) / 0.12);
+  }
+
+  .dashboard-main[data-dashboard-context="skillcore"] .dashboard-content-grid table thead,
+  .dashboard-main[data-dashboard-context="discovery"] .dashboard-content-grid table thead,
+  .dashboard-main[data-dashboard-context="talentflow"] .dashboard-content-grid table thead {
+    background-color: hsl(var(--primary) / 0.08);
+  }
+
+  .dashboard-main[data-dashboard-context="messaging"] .dashboard-content-grid > * {
+    @apply border-secondary/20 bg-gradient-to-b from-card to-secondary/10;
+  }
+
+  .dashboard-main[data-dashboard-context="jobs"] .dashboard-content-grid > * {
+    @apply border-primary/20 bg-gradient-to-b from-card to-primary/5;
+  }
+
+  .dashboard-main[data-dashboard-context="admin"] .dashboard-content-grid > * {
+    @apply border-border/70 shadow-md;
+  }
+
+  .dashboard-main[data-dashboard-context="workspace"] .dashboard-content-grid > * {
+    @apply border-border/60;
+  }
 }
 
 @layer utilities {
