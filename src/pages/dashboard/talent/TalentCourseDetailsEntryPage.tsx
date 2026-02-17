@@ -20,14 +20,14 @@ const TalentCourseDetailsEntryPage = () => {
   }
 
   if (targetCourseId) {
-    return <Navigate to={`/dashboard/talent/courses/${targetCourseId}`} replace />;
+    return <Navigate to={`/talent/learning/${targetCourseId}`} replace />;
   }
 
   return (
     <Card className="border-slate-200 shadow-sm">
       <CardContent className="space-y-3 p-5">
         <p className="text-sm text-slate-600">No course details available yet. Enroll in a course first.</p>
-        <Button asChild variant="outline"><Link to="/dashboard/talent/courses">Go to My Courses</Link></Button>
+        <Button asChild variant="outline"><Link to="/talent/learning">Go to My Courses</Link></Button>
       </CardContent>
     </Card>
   );

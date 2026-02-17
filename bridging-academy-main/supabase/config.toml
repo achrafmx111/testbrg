@@ -1,0 +1,10 @@
+project_id = "kpvoaudnyxitzzgnfxsr"
+
+[functions.send-course-registration]
+verify_jwt = false
+
+[functions.send-contact-message]
+verify_jwt = false
+
+[functions.send-unified-contact]
+verify_jwt = false

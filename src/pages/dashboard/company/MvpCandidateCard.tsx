@@ -1,7 +1,8 @@
-import { MapPin, Zap, Star, ArrowRight, Calendar, User, MessageSquare, Heart, MoreHorizontal } from "lucide-react";
+import { MapPin, Zap, Star, ArrowRight, Calendar, User, MessageSquare, Heart, MoreHorizontal, Trophy, Target, Sparkles, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     Select,
     SelectContent,
@@ -49,6 +50,7 @@ interface MvpCandidateCardProps {
         languageMatch: number;
         readiness: number;
     };
+    matchReasons?: string[];
     onToggleFavorite: (talentId: string) => void;
     onRequestInterview: (candidate: MvpTalentProfile) => void;
     onViewProfile: (candidate: MvpTalentProfile) => void;
@@ -68,6 +70,7 @@ export const MvpCandidateCard = ({
     favorite,
     matchScore,
     matchBreakdown,
+    matchReasons,
     onToggleFavorite,
     onRequestInterview,
     onViewProfile,
@@ -89,242 +92,246 @@ export const MvpCandidateCard = ({
     const isJobReady = candidate.placement_status === 'JOB_READY';
 
     return (
-        <Card className="overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col bg-white">
-            <CardHeader className="pb-4 border-b bg-slate-50/60">
-                <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-xl shadow-inner">
-                            <User className="h-6 w-6" />
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -5 }}
+            transition={{ duration: 0.4 }}
+        >
+            <Card className="relative overflow-hidden border-slate-200/60 dark:border-slate-800/60 shadow-xl hover:shadow-2xl transition-all duration-500 group flex flex-col bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl rounded-[2.5rem]">
+                {/* Decorative background glow */}
+                <div className="absolute top-0 right-0 h-40 w-40 bg-primary/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+
+                <CardHeader className="pb-4 border-b border-border/40">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="relative">
+                                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center text-primary shadow-inner group-hover:from-primary/10 group-hover:to-primary/20 transition-all duration-500">
+                                    <User className="h-8 w-8 text-slate-400 group-hover:text-primary transition-colors" />
+                                </div>
+                                {isJobReady && (
+                                    <div className="absolute -top-1 -right-1 h-5 w-5 bg-gold rounded-full border-2 border-white dark:border-slate-950 flex items-center justify-center shadow-lg">
+                                        <Zap className="h-3 w-3 text-navy fill-navy" />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="text-xl font-bold tracking-tight text-navy dark:text-white">Candidate #{candidate.user_id.slice(0, 5)}</h3>
+                                    {matchScore !== undefined && matchScore > 85 && (
+                                        <Sparkles className="h-4 w-4 text-gold animate-pulse" />
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-slate-400">
+                                    <span className="flex items-center gap-1.5"><Target className="h-3.5 w-3.5 text-primary" /> {candidate.years_of_experience}y Exp</span>
+                                    <span className="flex items-center gap-1.5"><Badge variant="outline" className="text-[10px] rounded-full border-primary/20 text-primary bg-primary/5 uppercase tracking-widest">{candidate.placement_status === 'JOB_READY' ? 'Ready' : 'Vetting'}</Badge></span>
+                                </div>
+                            </div>
                         </div>
-                        <div>
+
+                        <div className="flex flex-col items-end gap-2">
+                            {matchScore !== undefined && (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="relative group/score cursor-help">
+                                                <div className="absolute inset-0 bg-primary/20 blur-md rounded-full opacity-0 group-hover/score:opacity-100 transition-opacity"></div>
+                                                <Badge variant="outline" className="relative h-10 px-4 bg-primary/5 text-primary border-primary/20 rounded-2xl">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest mr-2">Match</span>
+                                                    <span className="text-lg font-black">{Math.round(matchScore)}%</span>
+                                                </Badge>
+                                            </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="bg-navy-dark text-white border-none p-4 rounded-xl shadow-2xl">
+                                            <div className="space-y-2 w-48">
+                                                <p className="font-bold text-xs uppercase tracking-widest text-slate-400">AI Score Breakdown</p>
+                                                <div className="space-y-1">
+                                                    <div className="flex justify-between text-[11px]"><span>Technical Skills</span> <span className="font-bold text-primary">{matchBreakdown?.skillsOverlap}%</span></div>
+                                                    <div className="flex justify-between text-[11px]"><span>Language Proficiency</span> <span className="font-bold text-primary">{matchBreakdown?.languageMatch}%</span></div>
+                                                    <div className="flex justify-between text-[11px]"><span>Professional Readiness</span> <span className="font-bold text-primary">{matchBreakdown?.readiness}%</span></div>
+                                                </div>
+                                            </div>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )}
+                        </div>
+                    </div>
+                </CardHeader>
+
+                <CardContent className="pt-6 space-y-6 flex-1">
+                    {isFavorite && (
+                        <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-navy/10 border border-border/40">
                             <div className="flex items-center gap-2">
-                                <CardTitle className="text-lg">Candidate #{candidate.user_id.slice(0, 5)}</CardTitle>
-                                <Badge variant={isJobReady ? "default" : "secondary"} className="h-5 text-[10px]">
-                                    {isJobReady ? 'Job Ready' : 'In Training'}
+                                <Badge className="bg-primary shadow-lg shadow-primary/20 text-[10px] px-3 font-black uppercase tracking-widest rounded-full">
+                                    {pipelineStatus.replace('_', ' ')}
                                 </Badge>
                             </div>
-                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                                <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Available</span>
-                                <span className="flex items-center gap-1">
-                                    <div className={`h-2 w-2 rounded-full ${isJobReady ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                                    {isJobReady ? 'Immediate' : 'In Progress'}
-                                </span>
+                            <Select
+                                value={pipelineStatus}
+                                onValueChange={(v) => onUpdatePipelineStatus(candidate.user_id, v)}
+                                disabled={['hired', 'rejected'].includes(pipelineStatus)}
+                            >
+                                <SelectTrigger className="h-9 w-40 bg-white dark:bg-navy/20 border-none rounded-xl text-xs font-bold shadow-sm text-navy dark:text-white">
+                                    <SelectValue placeholder="Update Stage" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl border-none shadow-2xl bg-white dark:bg-navy-dark">
+                                    {PIPELINE_OPTIONS.map((opt) => (
+                                        <SelectItem key={opt.value} value={opt.value} className="font-medium">
+                                            {opt.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3 flex items-center gap-2">
+                                    <Zap className="h-3 w-3 text-gold fill-gold" /> Key Skills
+                                </h4>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {candidate.skills?.slice(0, 4).map((skill, idx) => (
+                                        <Badge key={idx} variant="secondary" className="bg-slate-100 dark:bg-navy/20 text-[10px] h-6 px-2.5 font-bold rounded-lg border-none hover:bg-primary/10 hover:text-primary transition-colors cursor-default text-navy dark:text-slate-300">
+                                            {skill}
+                                        </Badge>
+                                    ))}
+                                    {candidate.skills && candidate.skills.length > 4 && (
+                                        <Badge variant="outline" className="text-[10px] h-6 border-slate-200 text-slate-400 font-bold">+{candidate.skills.length - 4}</Badge>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3 flex items-center gap-2">
+                                    <Languages className="h-3 w-3 text-primary" /> Languages
+                                </h4>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {candidate.languages?.map((lang, idx) => (
+                                        <Badge key={idx} variant="outline" className="text-[10px] h-6 px-2.5 font-bold border-slate-200 text-slate-500 rounded-lg">
+                                            {lang}
+                                        </Badge>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        {matchScore !== undefined && (
+
+                    <div className="grid grid-cols-3 gap-4 p-4 rounded-3xl bg-slate-50 dark:bg-navy/10 border border-slate-100 dark:border-navy/40">
+                        <div className="text-center space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Coach</span>
+                            <div className="flex justify-center items-center gap-1 text-primary">
+                                <Trophy className="h-3 w-3" />
+                                <span className="text-sm font-black">{candidate.coach_rating || 4.5}</span>
+                            </div>
+                        </div>
+                        <div className="text-center space-y-1 border-x border-slate-200 dark:border-navy/40">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Rating</span>
+                            <div className="flex justify-center items-center gap-1 text-gold">
+                                <Star className="h-3 w-3 fill-gold" />
+                                <span className="text-sm font-black">4.8</span>
+                            </div>
+                        </div>
+                        <div className="text-center space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</span>
+                            <div className="flex justify-center items-center gap-1">
+                                <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary))] animate-pulse" />
+                                <span className="text-[10px] font-black text-navy dark:text-slate-300 uppercase tracking-widest">Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Private Employer Note */}
+                    {isFavorite && (
+                        <div className="bg-gold/5 dark:bg-gold/5 p-4 rounded-2xl border border-gold/10 dark:border-gold/10">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-[10px] font-black text-gold-dark dark:text-gold flex items-center gap-2 tracking-widest uppercase">
+                                    <Star className="h-3 w-3 fill-gold" /> Recruiter Notes
+                                </span>
+                                <button
+                                    className="text-[10px] font-black text-gold hover:text-gold-dark transition-colors uppercase tracking-widest"
+                                    onClick={() => {
+                                        setEditingNote(candidate.user_id);
+                                        setTempNote(favorite.notes || "");
+                                    }}
+                                >
+                                    {favorite.notes ? "Edit" : "Add Note"}
+                                </button>
+                            </div>
+                            {editingNote === candidate.user_id ? (
+                                <div className="space-y-3">
+                                    <textarea
+                                        className="w-full text-xs p-3 border-none rounded-xl bg-white dark:bg-navy-dark shadow-inner resize-none focus:ring-1 focus:ring-gold/20 text-navy dark:text-white"
+                                        value={tempNote}
+                                        onChange={(e) => setTempNote(e.target.value)}
+                                        placeholder="Add private evaluation notes..."
+                                        rows={3}
+                                    />
+                                    <div className="flex justify-end gap-2">
+                                        <Button size="sm" variant="ghost" className="h-8 text-[10px] font-bold rounded-lg uppercase tracking-widest" onClick={() => setEditingNote(null)}>Cancel</Button>
+                                        <Button size="sm" className="h-8 px-4 bg-gold hover:bg-gold-dark text-navy text-[10px] font-bold rounded-lg uppercase tracking-widest" onClick={() => onSaveNote(candidate.user_id, tempNote)} disabled={isSavingNote}>
+                                            {isSavingNote ? "Saving..." : "Save Note"}
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="text-xs text-gold-dark dark:text-gold/80 italic leading-relaxed">
+                                    {favorite.notes || "No private notes. Add your evaluation to keep track of this candidate."}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-3 pt-2">
+                        <Button
+                            className="h-14 flex-1 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold tracking-tight shadow-xl shadow-primary/20 transition-all active:scale-95 text-lg"
+                            variant="default"
+                            onClick={() => onViewProfile(candidate)}
+                        >
+                            Candidate Profile <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+
+                        <div className="flex gap-2">
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Badge variant="outline" className="h-8 px-2.5 bg-white text-slate-700 border-slate-200">
-                                            <span className="text-[10px] font-bold uppercase tracking-wide mr-1">Match</span>
-                                            <span className="text-xs font-black">{Math.round(matchScore)}%</span>
-                                        </Badge>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className={`h-14 w-14 rounded-2xl transition-all duration-300 ${isFavorite ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'bg-slate-100 hover:bg-slate-200 dark:bg-navy/20 text-slate-500'}`}
+                                            onClick={() => onToggleFavorite(candidate.user_id)}
+                                        >
+                                            <Heart className={`h-6 w-6 ${isFavorite ? "fill-primary text-primary scale-110" : ""}`} />
+                                        </Button>
                                     </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p className="text-xs">Based on skills, language, and experience matching.</p>
-                                    </TooltipContent>
+                                    <TooltipContent><p className="text-xs font-bold">{isFavorite ? "Remove from Talent Pool" : "Add to Shortlist"}</p></TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
-                        )}
 
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Badge variant="outline" className="h-8 px-2.5 bg-white text-primary border-primary/30">
-                                        <Zap className="h-3.5 w-3.5 mr-1" />
-                                        <span className="text-[10px] font-bold uppercase tracking-wide mr-1">Ready</span>
-                                        <span className="text-xs font-black">{readinessScore}%</span>
-                                    </Badge>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p className="text-xs">Overall readiness score based on skills and training</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </div>
-                </div>
-            </CardHeader>
-
-            <CardContent className="pt-5 space-y-5 flex-1">
-                {isFavorite && (
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-[10px] bg-white">
-                                Pipeline
-                            </Badge>
-                            <Badge variant="secondary" className="text-[10px]">
-                                {pipelineStatus.replace('_', ' ')}
-                            </Badge>
-                        </div>
-                        <Select
-                            value={pipelineStatus}
-                            onValueChange={(v) => onUpdatePipelineStatus(candidate.user_id, v)}
-                            disabled={['hired', 'rejected'].includes(pipelineStatus)}
-                        >
-                            <SelectTrigger className={`h-8 w-[170px] bg-white ${['hired', 'rejected'].includes(pipelineStatus) ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                <SelectValue placeholder="Update stage" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {PIPELINE_OPTIONS.map((opt) => (
-                                    <SelectItem key={opt.value} value={opt.value}>
-                                        {opt.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                )}
-
-                {/* Match Breakdown */}
-                {matchBreakdown && (
-                    <div className="text-xs text-muted-foreground space-y-1 bg-muted/30 p-2 rounded">
-                        <div className="flex justify-between"><span>Skills:</span> <span>{matchBreakdown.skillsOverlap}%</span></div>
-                        <div className="flex justify-between"><span>Language:</span> <span>{matchBreakdown.languageMatch}%</span></div>
-                        <div className="flex justify-between"><span>Readiness:</span> <span>{matchBreakdown.readiness}%</span></div>
-                    </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                        <div>
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1">
-                                <Zap className="h-3 w-3 text-yellow-500" /> Skills
-                            </h4>
-                            <div className="flex flex-wrap gap-1">
-                                {candidate.skills?.slice(0, 6).map((skill, idx) => (
-                                    <Badge key={idx} variant="secondary" className="bg-primary/5 text-[9px] h-5 border-none">
-                                        {skill}
-                                    </Badge>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1">
-                                Languages
-                            </h4>
-                            <div className="flex flex-wrap gap-1">
-                                {candidate.languages?.map((lang, idx) => (
-                                    <span key={idx} className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                                        {lang}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-3 bg-muted/10 p-3 rounded-xl border border-dashed">
-                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                            Details
-                        </h4>
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center text-xs">
-                                <span className="text-muted-foreground">Experience:</span>
-                                <span className="font-bold text-primary">{candidate.years_of_experience} years</span>
-                            </div>
-                            <div className="flex justify-between items-center text-xs">
-                                <span className="text-muted-foreground">Coach Rating:</span>
-                                <span className="font-bold">{candidate.coach_rating}/5</span>
-                            </div>
-                            <div className="flex justify-between items-center text-xs">
-                                <span className="text-muted-foreground">Availability:</span>
-                                <Badge variant={candidate.availability ? "outline" : "secondary"} className="h-5 py-0 text-[10px]">
-                                    {candidate.availability ? 'Available' : 'Not Available'}
-                                </Badge>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Private Employer Note */}
-                {isFavorite && (
-                    <div className="bg-yellow-50/50 p-3 rounded-lg border border-yellow-100">
-                        <div className="flex items-center justify-between mb-1">
-                            <span className="text-[10px] font-bold text-yellow-700 flex items-center gap-1">
-                                <Star className="h-3 w-3 fill-yellow-500" /> INTERNAL NOTE
-                            </span>
-                            <button
-                                className="text-[10px] text-yellow-600 hover:underline"
-                                onClick={() => {
-                                    setEditingNote(candidate.user_id);
-                                    setTempNote(favorite.notes || "");
-                                }}
-                            >
-                                {favorite.notes ? "Edit" : "Add Note"}
-                            </button>
-                        </div>
-                        {editingNote === candidate.user_id ? (
-                            <div className="space-y-2">
-                                <textarea
-                                    className="w-full text-xs p-2 border rounded bg-white"
-                                    value={tempNote}
-                                    onChange={(e) => setTempNote(e.target.value)}
-                                    placeholder="Add private evaluation notes..."
-                                    rows={2}
-                                />
-                                <div className="flex justify-end gap-1">
-                                    <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => setEditingNote(null)}>Cancel</Button>
-                                    <Button size="sm" className="h-6 text-[10px]" onClick={() => onSaveNote(candidate.user_id, tempNote)} disabled={isSavingNote}>
-                                        {isSavingNote ? "..." : "Save"}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-14 w-14 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-navy/20 text-slate-500">
+                                        <MoreHorizontal className="h-6 w-6" />
                                     </Button>
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="text-xs text-yellow-800 italic">
-                                {favorite.notes || "No notes yet. Add your evaluation here."}
-                            </p>
-                        )}
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl border-none bg-white dark:bg-navy-dark">
+                                    <DropdownMenuItem className="h-11 rounded-xl gap-3 font-semibold focus:bg-primary/5 cursor-pointer text-navy dark:text-white" onClick={() => onRequestInterview(candidate)}>
+                                        <Calendar className="h-4 w-4 text-gold" /> Request Interview
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="h-11 rounded-xl gap-3 font-semibold focus:bg-primary/5 cursor-pointer text-navy dark:text-white" onClick={() => onMessageCandidate(candidate)}>
+                                        <MessageSquare className="h-4 w-4 text-primary" /> Direct Message
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </div>
-                )}
-
-                <div className="pt-1 flex flex-wrap gap-2 sm:flex-nowrap">
-                    <Button
-                        className="h-10 w-full shadow-primary/10 transition-all group-hover:bg-primary sm:flex-1"
-                        variant="default"
-                        onClick={() => onViewProfile(candidate)}
-                    >
-                        View Full Profile <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className={`h-10 w-10 shrink-0 transition-colors ${isFavorite ? 'bg-primary/5 text-primary border-primary/20' : ''}`}
-                        onClick={() => onToggleFavorite(candidate.user_id)}
-                    >
-                        <Heart className={`h-5 w-5 ${isFavorite ? "fill-primary text-primary" : ""}`} />
-                    </Button>
-
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 shrink-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                        title="Quick Interview Request"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onRequestInterview(candidate);
-                        }}
-                        disabled={isRequestingInterview || favorite?.pipeline_status === 'interview_requested'}
-                    >
-                        <Calendar className="h-5 w-5" />
-                    </Button>
-
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 shrink-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        title="Send Message"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onMessageCandidate(candidate);
-                        }}
-                    >
-                        <MessageSquare className="h-5 w-5" />
-                    </Button>
-                </div>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+        </motion.div>
     );
 };
 

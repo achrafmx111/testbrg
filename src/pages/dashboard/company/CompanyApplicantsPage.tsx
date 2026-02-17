@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Loader2, Calendar, MoreHorizontal, AlertCircle, CheckCircle2, User, XCircle } from "lucide-react";
+import { Loader2, Calendar, MoreHorizontal, Search, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -155,6 +156,7 @@ function SortableItem({ id, application, profile, talent, job, onSchedule }: Sor
 export default function CompanyApplicantsPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const filterJobId = searchParams.get("jobId") ?? "all";
+    const focusStage = (searchParams.get("stage") as ApplicationStage | null) ?? "all";
     const { toast } = useToast();
 
     // Data
@@ -167,6 +169,7 @@ export default function CompanyApplicantsPage() {
     // Modal
     const [interviewOpen, setInterviewOpen] = useState(false);
     const [selectedApp, setSelectedApp] = useState<MvpApplication | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
 
     // Dnd Sensors
     const sensors = useSensors(
@@ -177,7 +180,7 @@ export default function CompanyApplicantsPage() {
     const [activeId, setActiveId] = useState<string | null>(null);
 
     // Load Data
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
@@ -214,16 +217,33 @@ export default function CompanyApplicantsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [toast]);
 
     useEffect(() => {
         load();
-    }, []);
+    }, [load]);
 
     // Derived state for columns
     const filteredApps = applications.filter(app =>
-        filterJobId === "all" || app.job_id === filterJobId
+        (filterJobId === "all" || app.job_id === filterJobId) &&
+        (focusStage === "all" || app.stage === focusStage) &&
+        (searchTerm.trim().length === 0 ||
+            profiles[app.talent_id]?.full_name?.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+            jobs.find((job) => job.id === app.job_id)?.title?.toLowerCase().includes(searchTerm.trim().toLowerCase()))
     );
+
+    const stageCounts: Record<ApplicationStage, number> = {
+        APPLIED: filteredApps.filter((a) => a.stage === "APPLIED").length,
+        SCREEN: filteredApps.filter((a) => a.stage === "SCREEN").length,
+        INTERVIEW: filteredApps.filter((a) => a.stage === "INTERVIEW").length,
+        OFFER: filteredApps.filter((a) => a.stage === "OFFER").length,
+        HIRED: filteredApps.filter((a) => a.stage === "HIRED").length,
+        REJECTED: filteredApps.filter((a) => a.stage === "REJECTED").length,
+    };
+
+    const conversionRate = filteredApps.length
+        ? Math.round(((stageCounts.HIRED + stageCounts.OFFER) / filteredApps.length) * 100)
+        : 0;
 
     const columns: Record<ApplicationStage, MvpApplication[]> = {
         APPLIED: filteredApps.filter(a => a.stage === 'APPLIED'),
@@ -298,15 +318,36 @@ export default function CompanyApplicantsPage() {
 
     return (
         <div className="space-y-6 h-[calc(100vh-140px)] flex flex-col">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 bg-background/95 backdrop-blur z-10 py-2">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Applicant Pipeline</h2>
-                    <p className="text-muted-foreground">Drag and drop candidates to manage their progress.</p>
+            <div className="sticky top-0 z-10 space-y-4 rounded-xl border border-border/60 bg-background/80 p-6 backdrop-blur-xl shadow-sm">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div data-testid="company-ats-header">
+                        <h2 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600">Applicant Pipeline</h2>
+                        <p className="text-muted-foreground mt-1">Kanban ATS view for interview flow, offers, and hiring outcomes.</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
+                        <MetricChip label="Total" value={filteredApps.length} />
+                        <MetricChip label="Interview" value={stageCounts.INTERVIEW} />
+                        <MetricChip label="Offers" value={stageCounts.OFFER} />
+                        <MetricChip label="Conversion" value={`${conversionRate}%`} />
+                    </div>
                 </div>
-                <div className="w-[300px]">
+
+                <div className="grid gap-2 md:grid-cols-[1.2fr_1fr_1fr]">
+                    <div className="relative">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-9"
+                            placeholder="Search candidate or role..."
+                        />
+                    </div>
                     <Select
                         value={filterJobId}
-                        onValueChange={(val) => setSearchParams(val === "all" ? {} : { jobId: val })}
+                        onValueChange={(val) => {
+                            const nextStage = focusStage !== "all" ? { stage: focusStage } : {};
+                            setSearchParams(val === "all" ? nextStage : { ...nextStage, jobId: val });
+                        }}
                     >
                         <SelectTrigger>
                             <SelectValue placeholder="Filter by Job" />
@@ -318,6 +359,36 @@ export default function CompanyApplicantsPage() {
                             ))}
                         </SelectContent>
                     </Select>
+
+                    <Select
+                        value={focusStage}
+                        onValueChange={(stage) => {
+                            const nextJob = filterJobId !== "all" ? { jobId: filterJobId } : {};
+                            setSearchParams(stage === "all" ? nextJob : { ...nextJob, stage });
+                        }}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Focus stage" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Stages</SelectItem>
+                            {STAGES.map((stage) => (
+                                <SelectItem key={stage} value={stage}>{STAGE_CONFIG[stage].label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                    <StageQuickFilter active={focusStage === "all"} onClick={() => setSearchParams(filterJobId === "all" ? {} : { jobId: filterJobId })} label="All" />
+                    {STAGES.map((stage) => (
+                        <StageQuickFilter
+                            key={stage}
+                            active={focusStage === stage}
+                            onClick={() => setSearchParams(filterJobId === "all" ? { stage } : { jobId: filterJobId, stage })}
+                            label={`${STAGE_CONFIG[stage].label} (${stageCounts[stage]})`}
+                        />
+                    ))}
                 </div>
             </div>
 
@@ -331,7 +402,7 @@ export default function CompanyApplicantsPage() {
                 <div className="flex-1 overflow-x-auto min-h-0">
                     <div className="flex gap-4 min-w-max h-full pb-4 px-1">
                         {STAGES.map(stage => (
-                            <div key={stage} className={`w-[280px] flex-shrink-0 flex flex-col rounded-lg border bg-slate-50/50 ${//columns[stage].length === 0 ? 'opacity-70' : ''
+                            <div data-testid={`ats-column-${stage.toLowerCase()}`} key={stage} className={`w-[280px] flex-shrink-0 flex flex-col rounded-lg border bg-slate-50/50 ${//columns[stage].length === 0 ? 'opacity-70' : ''
                                 ""
                                 }`}>
                                 <div className={`p-3 rounded-t-lg border-b bg-white flex items-center justify-between sticky top-0 z-10`}>
@@ -405,5 +476,38 @@ export default function CompanyApplicantsPage() {
                 }}
             />
         </div>
+    );
+}
+
+function MetricChip({ label, value }: { label: string; value: string | number }) {
+    return (
+        <div className="rounded-lg border border-border/60 bg-card px-3 py-2 text-center">
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
+            <p className="mt-1 text-sm font-semibold text-foreground">{value}</p>
+        </div>
+    );
+}
+
+function StageQuickFilter({
+    label,
+    active,
+    onClick,
+}: {
+    label: string;
+    active: boolean;
+    onClick: () => void;
+}) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors ${active
+                    ? "border-primary/40 bg-primary/10 text-primary"
+                    : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                }`}
+        >
+            <Circle className={`h-2.5 w-2.5 ${active ? "fill-current" : ""}`} />
+            {label}
+        </button>
     );
 }

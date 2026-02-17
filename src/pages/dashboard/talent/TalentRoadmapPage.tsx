@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { fireConfetti } from "@/utils/confetti";
 
 // Mock Data for the Roadmap
 const MILESTONES = [
@@ -102,9 +103,18 @@ export default function TalentRoadmapPage() {
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger>
-                                                <div className={`relative z-10 flex flex-col items-center group cursor-pointer transition-transform hover:scale-110 ${milestone.position === "left" ? "items-end" :
-                                                    milestone.position === "right" ? "items-start" : "items-center"
-                                                    }`}>
+                                                <div
+                                                    className={`relative z-10 flex flex-col items-center group cursor-pointer transition-transform hover:scale-110 ${milestone.position === "left" ? "items-end" :
+                                                        milestone.position === "right" ? "items-start" : "items-center"
+                                                        }`}
+                                                    onClick={() => {
+                                                        if (milestone.status === "completed") {
+                                                            fireConfetti();
+                                                        } else if (milestone.status === "locked") {
+                                                            // Maybe shake animation?
+                                                        }
+                                                    }}
+                                                >
                                                     <div className={`h-16 w-16 rounded-full border-4 flex items-center justify-center shadow-lg transition-all duration-300 ${milestone.status === "completed" ? "bg-green-100 border-green-500 text-green-600" :
                                                         milestone.status === "in-progress" ? "bg-white border-blue-500 text-blue-600 animate-pulse ring-4 ring-blue-500/20" :
                                                             "bg-slate-100 border-slate-300 text-slate-400 grayscale"
@@ -126,6 +136,7 @@ export default function TalentRoadmapPage() {
                                             </TooltipTrigger>
                                             <TooltipContent>
                                                 <p>{milestone.title} - {milestone.status}</p>
+                                                {milestone.status === "completed" && <p className="text-xs text-green-400">Click to celebrate!</p>}
                                             </TooltipContent>
                                         </Tooltip>
                                     </TooltipProvider>

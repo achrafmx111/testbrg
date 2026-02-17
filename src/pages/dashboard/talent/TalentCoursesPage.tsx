@@ -28,20 +28,20 @@ const TalentCoursesPage = () => {
           <p className="text-xs font-bold uppercase tracking-wide">Academy Workspace</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-800">My Courses</h1>
-          <p className="text-sm text-slate-500">Track progress, continue lessons, and open course details.</p>
-        </div>
-        <Select value={filter} onValueChange={(v) => setFilter(v as "all" | "in_progress" | "completed")}> 
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Courses</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-          </SelectContent>
-        </Select>
+          <div>
+            <h1 className="text-2xl font-black tracking-tight text-slate-800">My Courses</h1>
+            <p className="text-sm text-slate-500">Track progress, continue lessons, and open course details.</p>
+          </div>
+          <Select value={filter} onValueChange={(v) => setFilter(v as "all" | "in_progress" | "completed")}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Courses</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -73,10 +73,10 @@ const TalentCoursesPage = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Button asChild variant="outline">
-                      <Link to={`/dashboard/talent/courses/${enrollment.course_id}`}>Course Details</Link>
+                      <Link to={`/talent/learning/${enrollment.course_id}`}>Course Details</Link>
                     </Button>
                     <Button asChild>
-                      <Link to={`/dashboard/talent/courses/${enrollment.course_id}`}>Continue</Link>
+                      <Link to={`/talent/learning/${enrollment.course_id}`}>Continue</Link>
                     </Button>
                   </div>
                 </CardContent>

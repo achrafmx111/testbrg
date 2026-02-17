@@ -198,6 +198,20 @@ export interface MvpRolePermission {
   allowed: boolean;
 }
 
+export interface MvpTeamMember {
+  id: string;
+  company_id: string;
+  user_id: string;
+  role: string;
+  status: string;
+  invited_email?: string;
+  created_at: string;
+  profiles?: {
+    full_name: string | null;
+    email: string | null;
+  }
+}
+
 const mvpSchema: any = (supabase as any).schema("mvp");
 
 function mapArray<T>(value: unknown): T[] {
@@ -402,6 +416,22 @@ function mapRolePermission(row: any): MvpRolePermission {
   };
 }
 
+function mapTeamMember(row: any): MvpTeamMember {
+  return {
+    id: row.id,
+    company_id: row.company_id,
+    user_id: row.user_id,
+    role: row.role,
+    status: row.status,
+    invited_email: row.invited_email,
+    created_at: row.created_at,
+    profiles: row.profiles ? {
+      full_name: row.profiles.full_name,
+      email: row.profiles.email
+    } : undefined
+  };
+}
+
 export const mvp = {
   schema: mvpSchema,
 
@@ -412,9 +442,10 @@ export const mvp = {
   },
 
   async upsertProfile(input: { id: string; role: MvpRole; company_id?: string | null }): Promise<MvpProfile> {
+    const safeRole: MvpRole = input.role === "COMPANY" ? "COMPANY" : "TALENT";
     const { data, error } = await mvpSchema
       .from("profiles")
-      .upsert({ id: input.id, role: input.role, company_id: input.company_id ?? null }, { onConflict: "id" })
+      .upsert({ id: input.id, role: safeRole, company_id: input.company_id ?? null }, { onConflict: "id" })
       .select("*")
       .single();
     if (error) throw error;
@@ -495,6 +526,58 @@ export const mvp = {
     const { data, error } = await mvpSchema.from("companies").select("*").order("created_at", { ascending: false });
     if (error) throw error;
     return (data ?? []).map(mapCompany);
+  },
+
+  async listCompanyTeam(companyId: string): Promise<MvpTeamMember[]> {
+    const { data, error } = await mvpSchema
+      .from("companies_team")
+      .select("*, profiles!fk_companies_team_profiles(full_name, email)")
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      // Fallback for mock environment if table doesn't exist yet
+      console.warn("Could not list team members, likely missing table", error);
+      return [];
+    }
+    return (data ?? []).map(mapTeamMember);
+  },
+
+  async inviteTeamMember(companyId: string, email: string, role: string): Promise<MvpTeamMember> {
+    // 1. Check if user exists
+    const { data: userProfile } = await mvpSchema.from("profiles").select("id").eq("email", email).maybeSingle();
+    const userId = userProfile?.id;
+
+    // If user doesn't exist, we rely on the invited_email field. 
+    // In a real app, we'd trigger an Auth Invite here.
+
+    // 2. Insert into companies_team
+    const payload = {
+      company_id: companyId,
+      user_id: userId || null, // Can be null if using invited_email logic
+      invited_email: email,
+      role,
+      status: "pending"
+    };
+
+    const { data, error } = await mvpSchema
+      .from("companies_team")
+      .insert(payload)
+      .select("*, profiles!fk_companies_team_profiles(full_name, email)")
+      .single();
+
+    if (error) throw error;
+    return mapTeamMember(data);
+  },
+
+  async removeTeamMember(memberId: string): Promise<void> {
+    const { error } = await mvpSchema.from("companies_team").delete().eq("id", memberId);
+    if (error) throw error;
+  },
+
+  async updateTeamMemberRole(memberId: string, newRole: string): Promise<void> {
+    const { error } = await mvpSchema.from("companies_team").update({ role: newRole }).eq("id", memberId);
+    if (error) throw error;
   },
 
   async updateCompany(id: string, input: { name?: string; industry?: string | null; country?: string | null }): Promise<MvpCompany> {

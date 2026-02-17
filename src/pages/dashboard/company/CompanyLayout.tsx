@@ -1,33 +1,29 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import { LayoutDashboard, Users, FileText, Briefcase, MessageSquare, CreditCard, Building2, TrendingUp } from "lucide-react";
 import { DashboardShell, NavItem } from "../components/DashboardShell";
-import {
-    LayoutDashboard,
-    User,
-    Briefcase,
-    Users,
-    FileText,
-    CreditCard,
-    MessageSquare,
-    Gift
-} from "lucide-react";
 
 const companyNavItems: NavItem[] = [
-    { label: "Home", to: ".", icon: LayoutDashboard },
-    { label: "Profile", to: "profile", icon: User },
-    { label: "Jobs", to: "jobs", icon: Briefcase },
-    { label: "Talent Pool", to: "talent-pool", icon: Users },
-    { label: "Applicants", to: "applicants", icon: FileText },
-    { label: "Offers", to: "offers", icon: Gift },
-    { label: "Billing", to: "billing", icon: CreditCard },
-    { label: "Messages", to: "messages", icon: MessageSquare },
+  { label: "Overview", to: ".", icon: LayoutDashboard },
+  { label: "Analytics", to: "analytics", icon: TrendingUp },
+  { label: "Jobs", to: "jobs", icon: Briefcase },
+  { label: "Pipeline", to: "pipeline", icon: LayoutDashboard },
+  { label: "Talent Pool", to: "talent-pool", icon: Users },
+  { label: "Applicants", to: "applicants", icon: FileText },
+  { label: "Offers", to: "offers", icon: FileText },
+  { label: "Messages", to: "messages", icon: MessageSquare },
+  { label: "Billing", to: "billing", icon: CreditCard },
+  { label: "Company Profile", to: "profile", icon: Building2 },
 ];
 
 const CompanyLayout = () => {
-    return (
-        <DashboardShell navItems={companyNavItems}>
-            <Outlet />
-        </DashboardShell>
-    );
+  const location = useLocation();
+  const isHomePage = location.pathname === "/company" || location.pathname === "/company/";
+
+  return (
+    <DashboardShell navItems={companyNavItems} hideHeader={isHomePage}>
+      <Outlet />
+    </DashboardShell>
+  );
 };
 
 export default CompanyLayout;

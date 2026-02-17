@@ -65,7 +65,7 @@ const TalentCourseDetailsPage = () => {
       <Card className="border-slate-200 shadow-sm">
         <CardContent className="space-y-3 p-5">
           <p className="text-sm text-slate-600">Course details unavailable. This course is not part of your enrollments.</p>
-          <Button asChild variant="outline"><Link to="/dashboard/talent/courses">Go to My Courses</Link></Button>
+          <Button asChild variant="outline"><Link to="/talent/learning">Go to My Courses</Link></Button>
         </CardContent>
       </Card>
     );
@@ -77,7 +77,7 @@ const TalentCourseDetailsPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={() => navigate("/dashboard/talent/courses")}>
+        <Button variant="outline" onClick={() => navigate("/talent/learning")}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to My Courses
         </Button>
       </div>

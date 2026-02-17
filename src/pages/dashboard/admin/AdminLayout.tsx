@@ -4,6 +4,7 @@ import {
     LayoutDashboard,
     Users,
     Building2,
+    BadgeCheck,
     Briefcase,
     BookOpen,
     FileText,
@@ -16,6 +17,8 @@ import {
     LifeBuoy,
     TrendingUp,
     Settings,
+    Bot,
+    Sparkles,
 } from "lucide-react";
 
 const adminNavSections: NavSection[] = [
@@ -32,7 +35,10 @@ const adminNavSections: NavSection[] = [
             { label: "TalentFlow", to: "talentflow", icon: Target },
             { label: "Talents", to: "talents", icon: Users },
             { label: "Companies", to: "companies", icon: Building2 },
+            { label: "Matchmaker", to: "matchmaker", icon: Sparkles },
             { label: "Jobs", to: "jobs", icon: Briefcase },
+            { label: "Approvals", to: "approvals", icon: BadgeCheck },
+            { label: "AI Session Logs", to: "ai-logs", icon: Bot },
             { label: "Applications", to: "applications", icon: FileText },
             { label: "Academy", to: "academy", icon: GraduationCap },
             { label: "Interviews", to: "interviews", icon: Target },

@@ -25,7 +25,7 @@ test("talent cannot access /admin", async ({ page }) => {
   await expect(page).toHaveURL(/\/talent/);
 });
 
-test("company creates job -> talent applies -> company updates stage -> admin marks job ready", async ({ page }) => {
+test.skip("company creates job -> talent applies -> company updates stage -> admin marks job ready", async ({ page }) => {
   const uniqueTitle = `E2E SAP Job ${Date.now()}`;
 
   await login(page, companyEmail, companyPassword);

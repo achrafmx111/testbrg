@@ -10,7 +10,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.extract-skills]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-email]
-verify_jwt = false
+verify_jwt = true

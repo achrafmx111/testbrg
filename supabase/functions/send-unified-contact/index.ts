@@ -413,16 +413,6 @@ const handler = async (req: Request): Promise<Response> => {
       emailSubject = `🏢 Business Inquiry: ${result.data.organization_name}`;
       htmlBody = buildBusinessEmailHtml(result.data);
       replyToEmail = result.data.email;
-      htmlBody = ` 
-        <div style="font-family: sans-serif; padding: 20px;">
-          <h2>Employer Interest Notified</h2>
-          <p>An employer (<strong>${result.data.employer_email}</strong>) has expressed interest in a candidate.</p>
-          <p><strong>Candidate:</strong> ${result.data.candidate_name} (ID: ${result.data.candidate_id})</p>
-          <hr />
-          <p>Please log in to the Admin Dashboard to review and facilitate the connection.</p>
-        </div>
-      `;
-      replyToEmail = result.data.employer_email;
     } else if (rawData.type === "interview_request") {
       const result = InterviewRequestSchema.safeParse(rawData);
       if (!result.success) {

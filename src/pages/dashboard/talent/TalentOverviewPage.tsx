@@ -48,7 +48,7 @@ const TalentOverviewPage = () => {
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle className="text-lg">Course Progress Overview</CardTitle>
             <Button asChild variant="outline" size="sm">
-              <Link to="/dashboard/talent/courses">Open My Courses</Link>
+              <Link to="/talent/learning">Open My Courses</Link>
             </Button>
           </CardHeader>
           <CardContent className="space-y-3">
