@@ -78,29 +78,35 @@ const TalentPoolPage = () => {
       if (passportFile) passportPath = await uploadFile(passportFile, 'passport');
       if (certFile) certPath = await uploadFile(certFile, 'certificates');
 
+      // Generate ID on client to avoid needing .select() and triggering RLS read error for anons
+      const applicationId = crypto.randomUUID();
+
+      const newApplication = {
+        id: applicationId,
+        type: 'talent_pool_registration',
+        name: formData.get("name") as string,
+        email: formData.get("email") as string,
+        phone: formData.get("phone") as string,
+        country_city: formData.get("location") as string,
+        course_slug: 'talent-pool',
+        course_name: 'Talent Pool Registration',
+        message: formData.get("message") as string,
+        status: 'pending',
+        user_id: user?.id || null,
+        cv_path: cvPath,
+        passport_path: passportPath,
+        cert_path: certPath,
+        german_level: formData.get("german_level") as string,
+        sap_track: formData.get("sap_track") as string,
+        experience_years: parseInt(formData.get("experience") as string || "0")
+      };
+
       // 2. Create Application Record (Talent Pool Registration)
-      const { data: application, error: dbError } = await supabase
+      const { error: dbError } = await supabase
         .from('applications')
-        .insert({
-          type: 'talent_pool_registration',
-          name: formData.get("name") as string,
-          email: formData.get("email") as string,
-          phone: formData.get("phone") as string,
-          country_city: formData.get("location") as string,
-          course_slug: 'talent-pool',
-          course_name: 'Talent Pool Registration',
-          message: formData.get("message") as string,
-          status: 'pending',
-          user_id: user?.id || null,
-          cv_path: cvPath,
-          passport_path: passportPath,
-          cert_path: certPath,
-          // german_level: formData.get("german_level") as string,
-          // sap_track: formData.get("sap_track") as string,
-          // experience_years: parseInt(formData.get("experience") as string || "0")
-        })
-        .select()
-        .single();
+        .insert(newApplication);
+
+      let application = dbError ? null : newApplication;
 
       if (dbError) throw dbError;
 
