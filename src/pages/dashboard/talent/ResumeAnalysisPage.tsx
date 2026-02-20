@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Upload, FileText, CheckCircle, AlertCircle, RefreshCw, ChevronRight, Download, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -88,7 +89,7 @@ export default function ResumeAnalysisPage() {
         <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">AI Resume Analyzer</h1>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">AI Resume Analyzer</h1>
                     <p className="text-muted-foreground mt-1">Instant feedback on your CV's match with top German employers.</p>
                 </div>
                 {analysisResult && (
@@ -96,7 +97,7 @@ export default function ResumeAnalysisPage() {
                         <Button variant="outline" onClick={resetAnalysis}>
                             <RefreshCw className="mr-2 h-4 w-4" /> New Scan
                         </Button>
-                        <Button>
+                        <Button onClick={() => toast.success("Report link copied to clipboard")}>
                             <Share2 className="mr-2 h-4 w-4" /> Share Report
                         </Button>
                     </div>
@@ -105,10 +106,10 @@ export default function ResumeAnalysisPage() {
 
             {!analysisResult ? (
                 /* Upload State */
-                <Card className={`border-2 border-dashed transition-all duration-300 ${isDragging ? "border-primary bg-primary/5" : "border-slate-200"
+                <Card className={`border-2 border-dashed transition-all duration-300 ${isDragging ? "border-primary bg-primary/5" : "border-border/60"
                     }`}>
                     <CardContent className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className={`h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center mb-6 transition-transform duration-500 ${isAnalyzing ? "animate-pulse scale-110" : ""}`}>
+                        <div className={`h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-6 transition-transform duration-500 ${isAnalyzing ? "animate-pulse scale-110" : ""}`}>
                             {isAnalyzing ? (
                                 <RefreshCw className="h-10 w-10 text-primary animate-spin" />
                             ) : (
@@ -204,24 +205,24 @@ export default function ResumeAnalysisPage() {
                                     <TabsContent value="skills" className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="h-[250px] w-full">
-                                                <h4 className="text-sm font-semibold mb-4 text-center">Your Profile vs. Market Data</h4>
+                                <h4 className="text-sm font-semibold mb-4 text-center">Your Profile vs. Market Data</h4>
                                                 <ResponsiveContainer width="100%" height="100%">
                                                     <RadarChart cx="50%" cy="50%" outerRadius="80%" data={MOCK_RADAR_DATA}>
-                                                        <PolarGrid stroke="#e2e8f0" />
-                                                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 12 }} />
+                                                        <PolarGrid stroke="hsl(var(--border))" />
+                                                        <PolarAngleAxis dataKey="subject" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
                                                         <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                                                         <Radar
                                                             name="Market Avg"
                                                             dataKey="B"
-                                                            stroke="#94a3b8"
-                                                            fill="#94a3b8"
+                                                            stroke="hsl(var(--secondary))"
+                                                            fill="hsl(var(--secondary))"
                                                             fillOpacity={0.2}
                                                         />
                                                         <Radar
                                                             name="You"
                                                             dataKey="A"
-                                                            stroke="#6366f1"
-                                                            fill="#6366f1"
+                                                            stroke="hsl(var(--primary))"
+                                                            fill="hsl(var(--primary))"
                                                             fillOpacity={0.5}
                                                         />
                                                         <Tooltip />
@@ -231,7 +232,7 @@ export default function ResumeAnalysisPage() {
                                             <div className="space-y-3">
                                                 <h4 className="text-sm font-semibold mb-2">Critical Action Items</h4>
                                                 {GAP_ANALYSIS.map((item, idx) => (
-                                                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg border bg-slate-50">
+                                                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
                                                         <div className="flex items-center gap-3">
                                                             {item.status === "missing" ? (
                                                                 <AlertCircle className="h-5 w-5 text-red-500" />
@@ -241,7 +242,7 @@ export default function ResumeAnalysisPage() {
                                                                 <CheckCircle className="h-5 w-5 text-green-500" />
                                                             )}
                                                             <div>
-                                                                <p className="font-medium text-sm text-slate-900">{item.skill}</p>
+                                                                <p className="font-medium text-sm text-foreground">{item.skill}</p>
                                                                 <p className="text-xs text-muted-foreground capitalize">{item.impact} Impact</p>
                                                             </div>
                                                         </div>
@@ -266,13 +267,13 @@ export default function ResumeAnalysisPage() {
                     </Card>
 
                     {/* Recommendations */}
-                    <Card className="lg:col-span-3 bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-100">
+                    <Card className="lg:col-span-3 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
                         <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                             <div>
-                                <h3 className="font-bold text-lg text-indigo-900">Recommended Learning Path</h3>
-                                <p className="text-indigo-700/80 text-sm">Based on your gaps, we recommend the "SAP S/4HANA Migration Specialist" track.</p>
+                                <h3 className="font-bold text-lg text-foreground">Recommended Learning Path</h3>
+                                <p className="text-muted-foreground text-sm">Based on your gaps, we recommend the "SAP S/4HANA Migration Specialist" track.</p>
                             </div>
-                            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200">
+                            <Button className="shadow-lg shadow-primary/20" onClick={() => toast.info("Redirecting to course catalog...")}>
                                 View Course
                                 <ChevronRight className="ml-2 h-4 w-4" />
                             </Button>

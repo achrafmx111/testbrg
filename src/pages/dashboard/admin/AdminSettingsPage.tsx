@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Users2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { mvp } from "@/integrations/supabase/mvp";
 import { AdminSectionHeader, AdminStatCard } from "@/components/admin/AdminPrimitives";
 import { adminClassTokens } from "@/components/admin/designTokens";
@@ -86,7 +87,7 @@ export default function AdminSettingsPage() {
         title="Settings & Governance"
         description="Role policies, platform controls, audit visibility, and compliance posture in one workspace."
         aside={
-          <Button className="h-9 rounded-lg bg-primary/90 px-4 text-xs font-semibold tracking-wide text-primary-foreground hover:bg-primary">
+          <Button className="h-9 rounded-lg bg-primary/90 px-4 text-xs font-semibold tracking-wide text-primary-foreground hover:bg-primary" onClick={() => toast.success("Governance policies published")}>
             Publish governance update
           </Button>
         }

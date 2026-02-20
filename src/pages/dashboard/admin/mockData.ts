@@ -152,7 +152,7 @@ export const mockAdminApplications: MockApplication[] = [
       { skill: "Client communication", level: "Advanced" },
     ],
     missing_docs: [],
-    next_steps: { text: "Move to company interview pipeline", link: "/company/applicants" },
+    next_steps: { text: "Move to company interview pipeline", link: "/company/pipeline" },
   },
 ];
 

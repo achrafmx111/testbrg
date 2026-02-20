@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
-import { Clock3, Sparkles } from "lucide-react";
+import { ReactNode, useMemo, useState } from "react";
+import { BookOpen, Clock3, Sparkles, Target } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTalentLearningData } from "./useTalentLearningData";
@@ -13,80 +14,115 @@ const TalentCoursesPage = () => {
 
   const visibleEnrollments = useMemo(() => {
     if (filter === "all") return enrollments;
-    return enrollments.filter((e) => e.status === filter);
+    return enrollments.filter((item) => item.status === filter);
   }, [enrollments, filter]);
 
+  const stats = useMemo(() => {
+    const completed = enrollments.filter((item) => item.status === "completed").length;
+    const inProgress = enrollments.filter((item) => item.status === "in_progress").length;
+    const avg = enrollments.length
+      ? Math.round(enrollments.reduce((sum, item) => sum + (item.progress_percent || 0), 0) / enrollments.length)
+      : 0;
+
+    return {
+      total: enrollments.length,
+      completed,
+      inProgress,
+      avg,
+    };
+  }, [enrollments]);
+
   if (loading) {
-    return <div className="text-sm text-slate-500">Loading your courses...</div>;
+    return (
+      <div className="space-y-4 animate-in fade-in duration-300">
+        <div className="h-12 w-72 rounded-lg bg-muted/50" />
+        <div className="h-28 rounded-xl bg-muted/40" />
+        <div className="h-52 rounded-xl bg-muted/40" />
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="mb-4 flex items-center gap-2 text-primary">
-          <Sparkles className="h-4 w-4" />
-          <p className="text-xs font-bold uppercase tracking-wide">Academy Workspace</p>
-        </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <section className="rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/10 p-5 md:p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-slate-800">My Courses</h1>
-            <p className="text-sm text-slate-500">Track progress, continue lessons, and open course details.</p>
+            <Badge variant="secondary" className="mb-2 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]">
+              <Sparkles className="mr-1 h-3.5 w-3.5" /> Academy Workspace
+            </Badge>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">My courses</h1>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Track progression, continue modules, and open details with one consistent workflow.</p>
           </div>
-          <Select value={filter} onValueChange={(v) => setFilter(v as "all" | "in_progress" | "completed")}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+
+          <Select value={filter} onValueChange={(value) => setFilter(value as "all" | "in_progress" | "completed") }>
+            <SelectTrigger className="w-full md:w-[200px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Courses</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="all">All courses</SelectItem>
+              <SelectItem value="in_progress">In progress</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </section>
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Metric label="Total" value={`${stats.total}`} icon={<BookOpen className="h-4 w-4 text-primary" />} />
+        <Metric label="In progress" value={`${stats.inProgress}`} icon={<Clock3 className="h-4 w-4 text-primary" />} />
+        <Metric label="Completed" value={`${stats.completed}`} icon={<Target className="h-4 w-4 text-primary" />} />
+        <Metric label="Average progress" value={`${stats.avg}%`} icon={<Sparkles className="h-4 w-4 text-primary" />} />
+      </section>
 
       {visibleEnrollments.length === 0 ? (
-        <Card className="border-slate-200 shadow-sm">
-          <CardContent className="p-5 text-sm text-slate-500">No courses found for this filter.</CardContent>
+        <Card className="border-border/60">
+          <CardContent className="p-8 text-center text-sm text-muted-foreground">No courses found for this filter.</CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
           {visibleEnrollments.map((enrollment) => {
             const course = enrollment.courses;
             return (
-              <Card key={enrollment.id} className="border-slate-200 shadow-sm transition-transform hover:-translate-y-0.5">
-                <CardHeader>
-                  <CardTitle className="line-clamp-2 text-lg">{course?.title || "Course"}</CardTitle>
+              <Card key={enrollment.id} className="border-border/60 bg-card/80 transition hover:border-primary/40 hover:shadow-lg">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="line-clamp-2 text-lg">{course?.title || "Course"}</CardTitle>
+                    <Badge variant="secondary" className="capitalize">{enrollment.status}</Badge>
+                  </div>
+                  <CardDescription className="line-clamp-2">{course?.description || "No description available."}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="line-clamp-2 text-sm text-slate-600">{course?.description || "No description available."}</p>
-                  <div className="flex items-center justify-between text-sm text-slate-500">
-                    <span className="inline-flex items-center gap-1"><Clock3 className="h-4 w-4" /> {course?.duration_hours || 0}h</span>
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">{enrollment.status}</span>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" /> {course?.duration_hours || 0} hours</span>
+                    <span>{enrollment.progress_percent || 0}%</span>
                   </div>
-                  <div>
-                    <div className="mb-1 flex justify-between text-xs text-slate-500">
-                      <span>Progress</span>
-                      <span>{enrollment.progress_percent || 0}%</span>
-                    </div>
-                    <Progress value={enrollment.progress_percent || 0} className="h-2" />
-                  </div>
+                  <Progress value={enrollment.progress_percent || 0} className="h-2" />
                   <div className="grid grid-cols-2 gap-2">
-                    <Button asChild variant="outline">
-                      <Link to={`/talent/learning/${enrollment.course_id}`}>Course Details</Link>
-                    </Button>
-                    <Button asChild>
-                      <Link to={`/talent/learning/${enrollment.course_id}`}>Continue</Link>
-                    </Button>
+                    <Button asChild variant="outline"><Link to={`/talent/learning/${enrollment.course_id}`}>Course details</Link></Button>
+                    <Button asChild><Link to={`/talent/learning/${enrollment.course_id}`}>Continue</Link></Button>
                   </div>
                 </CardContent>
               </Card>
             );
           })}
-        </div>
+        </section>
       )}
     </div>
   );
 };
+
+function Metric({ label, value, icon }: { label: string; value: string; icon: ReactNode }) {
+  return (
+    <Card className="border-border/60">
+      <CardContent className="flex items-center justify-between p-4">
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+          <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">{value}</p>
+        </div>
+        <div className="rounded-xl border border-primary/20 bg-primary/10 p-2.5">{icon}</div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default TalentCoursesPage;

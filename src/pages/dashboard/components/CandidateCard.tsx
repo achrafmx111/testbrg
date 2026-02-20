@@ -66,25 +66,25 @@ export const CandidateCard = ({
             <CardHeader className="pb-4 border-b bg-slate-50/60">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-xl shadow-inner">
-                        <User className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <CardTitle className="text-lg">Candidate #{candidate.id.slice(0, 5)}</CardTitle>
-                            <Badge variant="outline" className="h-5 text-[10px] bg-white">
-                                {(candidate.experience_years || 0) >= 5 ? 'Senior' : (candidate.experience_years || 0) >= 2 ? 'Mid-Level' : 'Junior'}
-                            </Badge>
+                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-xl shadow-inner">
+                            <User className="h-6 w-6" />
                         </div>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {candidate.country_city || 'Regional'}</span>
-                            <span className="flex items-center gap-1">
-                                <div className={`h-2 w-2 rounded-full bg-green-500`} />
-                                Immediate
-                            </span>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <CardTitle className="text-lg">Candidate #{candidate.talent_id.slice(0, 5)}</CardTitle>
+                                <Badge variant="outline" className="h-5 text-[10px] bg-white">
+                                    {(candidate.experience_years || 0) >= 5 ? 'Senior' : (candidate.experience_years || 0) >= 2 ? 'Mid-Level' : 'Junior'}
+                                </Badge>
+                            </div>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {candidate.country_city || 'Regional'}</span>
+                                <span className="flex items-center gap-1">
+                                    <div className={`h-2 w-2 rounded-full bg-green-500`} />
+                                    Immediate
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
                     <div className="flex items-center gap-2">
                         <TooltipProvider>
                             <Tooltip>
@@ -131,7 +131,7 @@ export const CandidateCard = ({
                         </div>
                         <Select
                             value={pipelineStatus}
-                            onValueChange={(v) => onUpdatePipelineStatus(candidate.id, v)}
+                            onValueChange={(v) => onUpdatePipelineStatus(candidate.talent_id, v)}
                             disabled={['hired', 'rejected'].includes(pipelineStatus)}
                         >
                             <SelectTrigger className={`h-8 w-[170px] bg-white ${['hired', 'rejected'].includes(pipelineStatus) ? 'opacity-50 cursor-not-allowed' : ''}`}>
@@ -214,14 +214,14 @@ export const CandidateCard = ({
                             <button
                                 className="text-[10px] text-yellow-600 hover:underline"
                                 onClick={() => {
-                                    setEditingNote(candidate.id);
+                                    setEditingNote(candidate.talent_id);
                                     setTempNote(favorite.notes);
                                 }}
                             >
                                 {favorite.notes ? "Edit" : "Add Note"}
                             </button>
                         </div>
-                        {editingNote === candidate.id ? (
+                        {editingNote === candidate.talent_id ? (
                             <div className="space-y-2">
                                 <textarea
                                     className="w-full text-xs p-2 border rounded bg-white"
@@ -231,7 +231,7 @@ export const CandidateCard = ({
                                 />
                                 <div className="flex justify-end gap-1">
                                     <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => setEditingNote(null)}>Cancel</Button>
-                                    <Button size="sm" className="h-6 text-[10px]" onClick={() => onSaveNote(candidate.id, tempNote)} disabled={isSavingNote}>
+                                    <Button size="sm" className="h-6 text-[10px]" onClick={() => onSaveNote(candidate.talent_id, tempNote)} disabled={isSavingNote}>
                                         {isSavingNote ? "..." : "Save"}
                                     </Button>
                                 </div>
@@ -256,11 +256,10 @@ export const CandidateCard = ({
                         variant="outline"
                         size="icon"
                         className={`h-10 w-10 shrink-0 transition-colors ${favorite ? 'bg-primary/5 text-primary border-primary/20' : ''}`}
-                        onClick={() => onToggleFavorite(candidate.id)}
+                        onClick={() => onToggleFavorite(candidate.talent_id)}
                     >
                         <Star className={`h-5 w-5 ${favorite ? "fill-primary" : ""}`} />
                     </Button>
-
                     <Button
                         variant="ghost"
                         size="icon"
@@ -289,6 +288,6 @@ export const CandidateCard = ({
                     </Button>
                 </div>
             </CardContent>
-        </Card>
+        </Card >
     );
 };

@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { mvp, MvpTalentProfile, MvpJob } from "@/integrations/supabase/mvp";
+
 import { useToast } from "@/hooks/use-toast";
 import { MvpCandidateCard } from "./MvpCandidateCard";
 import { motion, AnimatePresence } from "framer-motion";
@@ -55,6 +56,8 @@ import { RecruitmentMessagingModal } from "@/pages/dashboard/components/Recruitm
 import { scoreTalentJob } from "@/lib/matchingEngine";
 import { expandSemanticTerms, includesSemantic } from "@/lib/semanticSearch";
 
+const mvpSchema = (supabase as any).schema("mvp");
+
 // Types
 interface EmployerFavorite {
     talent_id: string;
@@ -76,10 +79,10 @@ interface ProcessedTalent extends MvpTalentProfile {
 
 const PIPELINE_STAGES = [
     { value: "shortlisted", label: "Shortlisted", color: "bg-primary" },
-    { value: "interview_requested", label: "Interview Requested", color: "bg-gold" },
-    { value: "interviewing", label: "Interviewing", color: "bg-orange" },
-    { value: "offered", label: "Offered", color: "bg-primary-light" },
-    { value: "hired", label: "Hired", color: "bg-navy" },
+    { value: "interview_requested", label: "Interview Requested", color: "bg-secondary" },
+    { value: "interviewing", label: "Interviewing", color: "bg-accent" },
+    { value: "offered", label: "Offered", color: "bg-primary/80" },
+    { value: "hired", label: "Hired", color: "bg-secondary/80" },
     { value: "rejected", label: "Rejected", color: "bg-slate-400" },
 ];
 
@@ -122,8 +125,7 @@ export default function CompanyTalentPoolPage() {
 
     const loadFavorites = useCallback(async (employerId: string, companyId: string | null) => {
         try {
-            const { data, error } = await (supabase as any)
-                .schema('mvp')
+            const { data, error } = await mvpSchema
                 .from('employer_favorites')
                 .select('*')
                 .eq('employer_id', employerId)
@@ -192,8 +194,7 @@ export default function CompanyTalentPoolPage() {
             const isFav = !!favorites[talentId];
 
             if (isFav) {
-                const { error } = await (supabase as any)
-                    .schema('mvp')
+                const { error } = await mvpSchema
                     .from('employer_favorites')
                     .delete()
                     .eq('talent_id', talentId)
@@ -213,8 +214,7 @@ export default function CompanyTalentPoolPage() {
                     description: "Candidate removed from your shortlist",
                 });
             } else {
-                const { data, error } = await (supabase as any)
-                    .schema('mvp')
+                const { data, error } = await mvpSchema
                     .from('employer_favorites')
                     .insert({
                         talent_id: talentId,
@@ -253,8 +253,7 @@ export default function CompanyTalentPoolPage() {
 
         setIsSavingNote(true);
         try {
-            const { error } = await (supabase as any)
-                .schema('mvp')
+            const { error } = await mvpSchema
                 .from('employer_favorites')
                 .update({ notes: note })
                 .eq('talent_id', talentId)
@@ -292,8 +291,7 @@ export default function CompanyTalentPoolPage() {
         if (!employerId || !companyId || !favorites[talentId]) return;
 
         try {
-            const { error } = await (supabase as any)
-                .schema('mvp')
+            const { error } = await mvpSchema
                 .from('employer_favorites')
                 .update({ pipeline_status: status })
                 .eq('talent_id', talentId)
@@ -334,8 +332,7 @@ export default function CompanyTalentPoolPage() {
 
         setIsRequestingInterview(true);
         try {
-            const { error } = await (supabase as any)
-                .schema('mvp')
+            const { error } = await mvpSchema
                 .from('interview_requests')
                 .insert({
                     employer_id: employerId,
@@ -492,21 +489,21 @@ export default function CompanyTalentPoolPage() {
             {/* Header Section */}
             <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/5 rounded-[3rem] blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/20 shadow-2xl">
+                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card/80 backdrop-blur-xl p-8 rounded-[2.5rem] border border-border/60 shadow-2xl">
                     <div className="space-y-2">
                         <div className="flex items-center gap-3">
                             <div className="h-12 w-12 rounded-2xl bg-primary shadow-lg shadow-primary/20 flex items-center justify-center text-white">
                                 <Users className="h-6 w-6" />
                             </div>
-                            <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Talent Pool</h1>
+                            <h1 className="text-4xl font-black tracking-tight text-foreground">Talent Pool</h1>
                         </div>
-                        <p className="text-slate-500 font-medium ml-1">Discover pre-vetted candidates matched to your open roles.</p>
+                        <p className="text-muted-foreground font-medium ml-1">Discover pre-vetted candidates matched to your open roles.</p>
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gold/5 dark:bg-gold/10 rounded-2xl border border-gold/10 dark:border-gold/20">
-                            <Sparkles className="h-4 w-4 text-gold animate-pulse" />
-                            <span className="text-xs font-bold text-gold uppercase tracking-widest">Smart Match Active</span>
+                        <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-secondary/10 rounded-2xl border border-secondary/20">
+                            <Sparkles className="h-4 w-4 text-secondary animate-pulse" />
+                            <span className="text-xs font-bold text-secondary uppercase tracking-widest">Smart Match Active</span>
                         </div>
                         <Button className="h-12 px-6 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold shadow-xl shadow-primary/20 transition-all active:scale-95" onClick={() => navigate("/company/jobs")}>
                             Manage Jobs <ChevronRight className="ml-2 h-4 w-4" />
@@ -516,27 +513,27 @@ export default function CompanyTalentPoolPage() {
             </div>
 
             {/* Filter Bar */}
-            <Card className="border-none shadow-xl bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+            <Card className="border border-border/60 shadow-xl bg-card/80 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
                 <div className="p-6 md:p-8 flex flex-col gap-6">
                     <div className="flex flex-col md:flex-row gap-6">
                         <div className="relative flex-1 group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input
                                 placeholder="Search by skills, languages, or background..."
-                                className="h-14 pl-12 pr-4 rounded-2xl border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 focus:ring-primary/20 transition-all text-base font-medium shadow-sm"
+                                className="h-14 pl-12 pr-4 rounded-2xl border-border/60 bg-background/70 focus:ring-primary/20 transition-all text-base font-medium shadow-sm"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                             />
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3">
-                            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl">
+                            <div className="flex items-center gap-2 bg-muted p-1.5 rounded-2xl">
                                 <Button
                                     variant={selectedJobId === "all" ? "default" : "ghost"}
                                     size="sm"
                                     onClick={() => setSelectedJobId("all")}
-                                    className={`h-11 px-6 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${selectedJobId === "all" ? "shadow-lg" : "hover:bg-white dark:hover:bg-slate-700"
-                                        }`}
+                                        className={`h-11 px-6 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${selectedJobId === "all" ? "shadow-lg" : "hover:bg-background"
+                                            }`}
                                 >
                                     All Roles
                                 </Button>
@@ -546,7 +543,7 @@ export default function CompanyTalentPoolPage() {
                                         variant={selectedJobId === job.id ? "default" : "ghost"}
                                         size="sm"
                                         onClick={() => setSelectedJobId(job.id)}
-                                        className={`h-11 px-6 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${selectedJobId === job.id ? "shadow-lg" : "hover:bg-white dark:hover:bg-slate-700"
+                                        className={`h-11 px-6 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${selectedJobId === job.id ? "shadow-lg" : "hover:bg-background"
                                             }`}
                                     >
                                         {job.title}
@@ -554,15 +551,15 @@ export default function CompanyTalentPoolPage() {
                                 ))}
                             </div>
 
-                            <Button variant="outline" className="h-14 px-6 rounded-2xl border-slate-200 font-bold gap-2 hover:bg-slate-50 transition-all" onClick={handleResetFilters}>
+                            <Button variant="outline" className="h-14 px-6 rounded-2xl border-border/60 font-bold gap-2" onClick={handleResetFilters}>
                                 <X className="h-5 w-5" /> <span>Reset</span>
                             </Button>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 dark:border-slate-800 pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-border/60 pt-6">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Experience</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Experience</label>
                             <div className="flex gap-2">
                                 {['all', 'junior', 'mid', 'senior'].map(exp => (
                                     <Button
@@ -578,18 +575,18 @@ export default function CompanyTalentPoolPage() {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Min. Match Score ({minScore}%)</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Min. Match Score ({minScore}%)</label>
                             <div className="px-2 pt-2">
-                                <Progress value={minScore} className="h-2 bg-slate-100" />
+                                <Progress value={minScore} className="h-2 bg-muted" />
                                 <div className="flex justify-between mt-2">
                                     {[0, 25, 50, 75, 100].map(v => (
-                                        <button key={v} onClick={() => setMinScore(v)} className="text-[9px] font-bold text-slate-400 hover:text-primary">{v}%</button>
+                                        <button key={v} onClick={() => setMinScore(v)} className="text-[9px] font-bold text-muted-foreground hover:text-primary">{v}%</button>
                                     ))}
                                 </div>
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">SAP Specialization</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">SAP Specialization</label>
                             <div className="flex gap-2">
                                 {['all', 'FI', 'MM', 'SD', 'BTP'].map(track => (
                                     <Button
@@ -611,11 +608,11 @@ export default function CompanyTalentPoolPage() {
             {/* Main Tabs */}
             <Tabs defaultValue="discovery" className="space-y-8">
                 <div className="flex justify-center">
-                    <TabsList className="h-16 p-2 rounded-[2rem] bg-slate-100/50 dark:bg-slate-800/50 backdrop-blur-md border border-white/20 shadow-inner">
-                        <TabsTrigger value="discovery" onClick={() => setShowFavoritesOnly(false)} className="h-full px-10 rounded-[1.5rem] text-sm font-black uppercase tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-xl transition-all gap-2">
+                    <TabsList className="h-16 p-2 rounded-[2rem] bg-muted/60 backdrop-blur-md border border-border/60 shadow-inner">
+                        <TabsTrigger value="discovery" onClick={() => setShowFavoritesOnly(false)} className="h-full px-10 rounded-[1.5rem] text-sm font-black uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-xl transition-all gap-2">
                             <Target className="h-4 w-4" /> Discovery
                         </TabsTrigger>
-                        <TabsTrigger value="favorites" onClick={() => setShowFavoritesOnly(true)} className="h-full px-10 rounded-[1.5rem] text-sm font-black uppercase tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-xl transition-all gap-2">
+                        <TabsTrigger value="favorites" onClick={() => setShowFavoritesOnly(true)} className="h-full px-10 rounded-[1.5rem] text-sm font-black uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-xl transition-all gap-2">
                             <Heart className="h-4 w-4" /> My Shortlist ({Object.keys(favorites).length})
                         </TabsTrigger>
                     </TabsList>
@@ -649,12 +646,12 @@ export default function CompanyTalentPoolPage() {
                 </div>
 
                 {processedTalents.length === 0 && (
-                    <div className="text-center py-20 bg-white/40 dark:bg-slate-900/40 rounded-[3rem] border-2 border-dashed border-slate-200">
-                        <div className="h-20 w-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400">
+                    <div className="text-center py-20 bg-card/60 rounded-[3rem] border-2 border-dashed border-border/60">
+                        <div className="h-20 w-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6 text-muted-foreground">
                             <Users className="h-10 w-10" />
                         </div>
-                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white">No candidates found</h3>
-                        <p className="text-slate-500 mt-2">Try adjusting your filters or search terms.</p>
+                        <h3 className="text-2xl font-bold text-foreground">No candidates found</h3>
+                        <p className="text-muted-foreground mt-2">Try adjusting your filters or search terms.</p>
                         <Button variant="outline" className="mt-6 rounded-xl font-bold" onClick={handleResetFilters}>Reset All Filters</Button>
                     </div>
                 )}
@@ -662,7 +659,7 @@ export default function CompanyTalentPoolPage() {
 
             {/* Candidate Deep Dive Sheet */}
             <Sheet open={isDeepDiveOpen} onOpenChange={setIsDeepDiveOpen}>
-                <SheetContent side="right" className="w-full sm:max-w-xl p-0 border-none bg-slate-950 text-white shadow-2xl">
+                <SheetContent side="right" className="w-full sm:max-w-xl p-0 border-none bg-card text-foreground shadow-2xl">
                     {selectedCandidate && (
                         <ScrollArea className="h-full">
                             <div className="p-8 space-y-8">
@@ -678,8 +675,8 @@ export default function CompanyTalentPoolPage() {
                                             <Users size={40} className="text-white" />
                                         </div>
                                         <div className="space-y-1">
-                                            <SheetTitle className="text-3xl font-black tracking-tight text-white">Candidate #{selectedCandidate.user_id.slice(0, 8)}</SheetTitle>
-                                            <div className="flex items-center gap-3 text-slate-400 font-bold text-xs uppercase tracking-widest">
+                                            <SheetTitle className="text-3xl font-black tracking-tight text-foreground">Candidate #{selectedCandidate.user_id.slice(0, 8)}</SheetTitle>
+                                            <div className="flex items-center gap-3 text-muted-foreground font-bold text-xs uppercase tracking-widest">
                                                 <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Mobile / Available</span>
                                                 <span className="h-1 w-1 rounded-full bg-slate-700" />
                                                 <span className="flex items-center gap-1"><ShieldCheck className="h-3 w-3 text-emerald-500" /> Verified</span>
@@ -692,7 +689,7 @@ export default function CompanyTalentPoolPage() {
                                     <div className="p-4 rounded-3xl bg-white/5 border border-white/10 space-y-2">
                                         <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-slate-500">
                                             <span>AI Match Score</span>
-                                            <Sparkles className="h-3 w-3 text-gold" />
+                                            <Sparkles className="h-3 w-3 text-secondary" />
                                         </div>
                                         <div className="text-3xl font-black text-primary">89%</div>
                                         <Progress value={89} className="h-1.5 bg-white/10" />
@@ -747,7 +744,7 @@ export default function CompanyTalentPoolPage() {
                                 </div>
 
                                 <div className="pt-4 flex gap-4">
-                                    <Button className="h-16 flex-1 rounded-[1.5rem] bg-navy-dark hover:bg-navy text-white font-black text-lg shadow-2xl shadow-navy/20" onClick={() => handleRequestInterview(selectedCandidate)}>
+                                    <Button className="h-16 flex-1 rounded-[1.5rem] font-black text-lg shadow-2xl shadow-primary/20" onClick={() => handleRequestInterview(selectedCandidate)}>
                                         Request Interview <ArrowRight className="ml-2 h-5 w-5" />
                                     </Button>
                                     <Button variant="outline" className="h-16 w-16 rounded-[1.5rem] border-white/10 bg-white/5 hover:bg-white/10 transition-all font-bold text-primary" onClick={() => handleMessageCandidate(selectedCandidate)}>

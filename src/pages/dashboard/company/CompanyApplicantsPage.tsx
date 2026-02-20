@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Loader2, Calendar, MoreHorizontal, Search, Circle } from "lucide-react";
+import { GripVertical, Briefcase, Filter, Loader2, Calendar, MoreHorizontal, Search, Circle, Sparkles, Users, Target, TrendingUp, Plus, ChevronRight } from "lucide-react";
+import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -22,6 +23,13 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+    TooltipPortal
+} from "@/components/ui/tooltip";
+import {
     DndContext,
     closestCorners,
     KeyboardSensor,
@@ -29,7 +37,7 @@ import {
     useSensor,
     useSensors,
     DragOverlay,
-    defaultDropAnimationSideEffects,
+    defaultDropAnimation,
     DragStartEvent,
     DragOverEvent,
     DragEndEvent,
@@ -42,20 +50,25 @@ import {
     useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useDroppable } from '@dnd-kit/core';
+import { restrictToWindowEdges, snapCenterToCursor } from '@dnd-kit/modifiers';
 
 import { supabase } from "@/integrations/supabase/client";
 import { ApplicationStage, mvp, MvpApplication, MvpJob, MvpProfile, MvpTalentProfile } from "@/integrations/supabase/mvp";
 import { scoreTalentJob } from "@/lib/matchingEngine";
 import { InterviewModal } from "@/components/mvp/InterviewModal";
+import { HiringAgent } from "@/services/agents/HiringAgent";
+import { AgentInsight } from "@/services/agents/types";
+
 
 // Stages mapped to display names and colors
-const STAGE_CONFIG: Record<ApplicationStage, { label: string; color: string }> = {
-    APPLIED: { label: "Applied", color: "bg-slate-100" },
-    SCREEN: { label: "Screening", color: "bg-blue-100" },
-    INTERVIEW: { label: "Interview", color: "bg-purple-100" },
-    OFFER: { label: "Offer", color: "bg-yellow-100" },
-    HIRED: { label: "Hired", color: "bg-green-100" },
-    REJECTED: { label: "Rejected", color: "bg-red-50" },
+const STAGE_CONFIG: Record<ApplicationStage, { label: string; color: string; gradient: string }> = {
+    APPLIED: { label: "Applied", color: "bg-slate-100", gradient: "from-slate-100/90 to-slate-100/30" },
+    SCREEN: { label: "Screening", color: "bg-primary/20", gradient: "from-primary/20 to-primary/5" },
+    INTERVIEW: { label: "Interview", color: "bg-secondary/20", gradient: "from-secondary/20 to-secondary/5" },
+    OFFER: { label: "Offer", color: "bg-yellow-100", gradient: "from-amber-100/80 to-amber-50/20" },
+    HIRED: { label: "Hired", color: "bg-green-100", gradient: "from-emerald-100/80 to-emerald-50/20" },
+    REJECTED: { label: "Rejected", color: "bg-red-50", gradient: "from-rose-100/70 to-rose-50/20" },
 };
 
 const STAGES: ApplicationStage[] = ["APPLIED", "SCREEN", "INTERVIEW", "OFFER", "HIRED", "REJECTED"];
@@ -69,9 +82,10 @@ interface SortableItemProps {
     talent?: MvpTalentProfile;
     job?: MvpJob;
     onSchedule: (app: MvpApplication) => void;
+    agentInsight?: AgentInsight;
 }
 
-function SortableItem({ id, application, profile, talent, job, onSchedule }: SortableItemProps) {
+function SortableItem({ id, application, profile, talent, job, onSchedule, agentInsight }: SortableItemProps) {
     const {
         attributes,
         listeners,
@@ -93,9 +107,18 @@ function SortableItem({ id, application, profile, talent, job, onSchedule }: Sor
     }
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="mb-3 touch-none">
-            <Card className="cursor-grab hover:shadow-md transition-shadow">
-                <CardContent className="p-3">
+        <div ref={setNodeRef} style={style} className="mb-3 touch-none group relative" data-testid="company-applicant-card">
+            <Card className="hover:shadow-md transition-shadow relative overflow-hidden">
+                <div
+                    {...attributes}
+                    {...listeners}
+                    className="absolute left-0 top-0 bottom-0 w-6 flex items-center justify-center cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors border-r border-transparent hover:border-border group-hover:opacity-100 opacity-0 bg-muted/20"
+                    title="Drag to move"
+                >
+                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                </div>
+
+                <CardContent className="p-3 pl-8">
                     <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
@@ -115,6 +138,47 @@ function SortableItem({ id, application, profile, talent, job, onSchedule }: Sor
                                 <Badge variant={matchScore > 80 ? "default" : "secondary"} className="text-[10px] px-1 h-5">
                                     {matchScore}%
                                 </Badge>
+                            )}
+                            {agentInsight && (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Badge
+                                                variant="outline"
+                                                className="text-[10px] px-1 h-5 border-primary/40 bg-primary/10 text-primary cursor-help"
+                                                onPointerDown={(e) => e.stopPropagation()}
+                                            >
+                                                AI Insight
+                                            </Badge>
+                                        </TooltipTrigger>
+                                        <TooltipPortal>
+                                            <TooltipContent side="top" sideOffset={10} className="max-w-xs z-[100] p-3 space-y-2">
+                                                <div className="space-y-1">
+                                                    <p className="font-bold text-xs uppercase tracking-wider text-primary">AI Match Analysis</p>
+                                                    <p className="text-xs leading-relaxed">{agentInsight.reasoning}</p>
+                                                </div>
+
+                                                {agentInsight.strengths?.length > 0 && (
+                                                    <div className="space-y-1">
+                                                        <p className="text-[10px] font-bold text-green-600 uppercase">Key Strengths</p>
+                                                        <ul className="text-[10px] list-disc pl-3 text-muted-foreground">
+                                                            {agentInsight.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                                                        </ul>
+                                                    </div>
+                                                )}
+
+                                                {agentInsight.risks?.length > 0 && (
+                                                    <div className="space-y-1">
+                                                        <p className="text-[10px] font-bold text-amber-600 uppercase">Considerations</p>
+                                                        <ul className="text-[10px] list-disc pl-3 text-muted-foreground">
+                                                            {agentInsight.risks.map((r, i) => <li key={i}>{r}</li>)}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </TooltipContent>
+                                        </TooltipPortal>
+                                    </Tooltip>
+                                </TooltipProvider>
                             )}
                         </div>
                     </div>
@@ -151,6 +215,62 @@ function SortableItem({ id, application, profile, talent, job, onSchedule }: Sor
     );
 }
 
+interface ApplicantColumnProps {
+    stage: ApplicationStage;
+    applications: MvpApplication[];
+    profiles: Record<string, MvpProfile>;
+    talentProfiles: Record<string, MvpTalentProfile>;
+    jobs: MvpJob[];
+    onSchedule: (app: MvpApplication) => void;
+    agentInsights: Record<string, AgentInsight>;
+}
+
+function ApplicantColumn({ stage, applications, profiles, talentProfiles, jobs, onSchedule, agentInsights }: ApplicantColumnProps) {
+    const { setNodeRef } = useDroppable({
+        id: stage,
+    });
+
+    return (
+        <div ref={setNodeRef} data-testid={`ats-column-${stage.toLowerCase()}`} className="w-[300px] flex-shrink-0 flex flex-col rounded-xl border border-border/60 bg-card/40">
+            <div className={`p-4 rounded-t-xl border-b bg-gradient-to-br ${STAGE_CONFIG[stage].gradient} flex items-center justify-between sticky top-0 z-10`}>
+                <div className="flex items-center gap-2">
+                    <div className={`h-2.5 w-2.5 rounded-full ${STAGE_CONFIG[stage].color.replace('bg-', 'bg-').replace('100', '500')}`} />
+                    <span className="font-bold text-sm text-foreground">{STAGE_CONFIG[stage].label}</span>
+                </div>
+                <Badge variant="secondary" className="border-0 bg-card/70 font-bold text-foreground h-5">
+                    {applications.length}
+                </Badge>
+            </div>
+
+            <SortableContext
+                id={stage}
+                items={applications.map(a => a.id)}
+                strategy={verticalListSortingStrategy}
+            >
+                <div className="flex-1 p-2 overflow-y-auto min-h-[150px]">
+                    {applications.map(app => (
+                        <SortableItem
+                            key={app.id}
+                            id={app.id}
+                            application={app}
+                            profile={profiles[app.talent_id]}
+                            talent={talentProfiles[app.talent_id]}
+                            job={jobs.find(j => j.id === app.job_id)}
+                            onSchedule={onSchedule}
+                            agentInsight={agentInsights[app.id]}
+                        />
+                    ))}
+                    {applications.length === 0 && (
+                        <div className="h-full flex items-center justify-center text-xs text-muted-foreground/50 italic py-8 border-2 border-dashed border-slate-200 rounded-md">
+                            Drop here
+                        </div>
+                    )}
+                </div>
+            </SortableContext>
+        </div>
+    );
+}
+
 // --- Main Page ---
 
 export default function CompanyApplicantsPage() {
@@ -165,6 +285,8 @@ export default function CompanyApplicantsPage() {
     const [profiles, setProfiles] = useState<Record<string, MvpProfile>>({});
     const [talentProfiles, setTalentProfiles] = useState<Record<string, MvpTalentProfile>>({});
     const [loading, setLoading] = useState(true);
+    const [agentInsights, setAgentInsights] = useState<Record<string, AgentInsight>>({});
+
 
     // Modal
     const [interviewOpen, setInterviewOpen] = useState(false);
@@ -218,6 +340,28 @@ export default function CompanyApplicantsPage() {
             setLoading(false);
         }
     }, [toast]);
+
+    const runAgent = useCallback(async (apps: MvpApplication[], jobsData: MvpJob[], talents: Record<string, MvpTalentProfile>) => {
+        const agent = new HiringAgent();
+        const newInsights: Record<string, AgentInsight> = {};
+
+        for (const app of apps) {
+            const job = jobsData.find(j => j.id === app.job_id);
+            const talent = talents[app.talent_id];
+            if (job && talent) {
+                const insight = await agent.analyzeMatch(job, talent);
+                newInsights[app.id] = insight;
+            }
+        }
+        setAgentInsights(newInsights);
+    }, []);
+
+    useEffect(() => {
+        if (!loading && applications.length > 0) {
+            runAgent(applications, jobs, talentProfiles);
+        }
+    }, [loading, applications.length, runAgent, jobs, talentProfiles]);
+
 
     useEffect(() => {
         load();
@@ -297,8 +441,14 @@ export default function CompanyApplicantsPage() {
                 try {
                     await mvp.updateApplicationStage(activeAppId, newStage);
                     toast({ title: "Updated", description: `Moved to ${STAGE_CONFIG[newStage].label}` });
-                    if (newStage === 'INTERVIEW') {
-                        // Optionally prompt for scheduling
+
+                    if (newStage === 'HIRED') {
+                        confetti({
+                            particleCount: 150,
+                            spread: 68,
+                            origin: { y: 0.65 },
+                            colors: ["#22c55e", "#0ea5e9", "#f59e0b"],
+                        });
                     }
                 } catch (error) {
                     // Revert on failure
@@ -317,69 +467,93 @@ export default function CompanyApplicantsPage() {
     }
 
     return (
-        <div className="space-y-6 h-[calc(100vh-140px)] flex flex-col">
-            <div className="sticky top-0 z-10 space-y-4 rounded-xl border border-border/60 bg-background/80 p-6 backdrop-blur-xl shadow-sm">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div data-testid="company-ats-header">
-                        <h2 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600">Applicant Pipeline</h2>
-                        <p className="text-muted-foreground mt-1">Kanban ATS view for interview flow, offers, and hiring outcomes.</p>
+        <div className="space-y-6 pb-6 animate-in fade-in duration-500">
+            <section className="rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/10 p-5 md:p-6 shadow-sm">
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div>
+                        <Badge variant="secondary" className="mb-2 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]">
+                            <Sparkles className="mr-1 h-3.5 w-3.5 text-primary" /> Hiring Intelligence
+                        </Badge>
+                        <h1 data-testid="company-ats-header" className="text-3xl font-bold tracking-tight text-foreground">Applicant Pipeline</h1>
+                        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                            Move candidates across stages, monitor conversion health, and keep momentum visible for every role.
+                        </p>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
-                        <MetricChip label="Total" value={filteredApps.length} />
-                        <MetricChip label="Interview" value={stageCounts.INTERVIEW} />
-                        <MetricChip label="Offers" value={stageCounts.OFFER} />
-                        <MetricChip label="Conversion" value={`${conversionRate}%`} />
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Select
+                            value={filterJobId}
+                            onValueChange={(val) => {
+                                const nextStage = focusStage !== "all" ? { stage: focusStage } : {};
+                                setSearchParams(val === "all" ? nextStage : { ...nextStage, jobId: val });
+                            }}
+                        >
+                            <SelectTrigger className="h-10 w-[240px]">
+                                <Briefcase className="mr-2 h-4 w-4 text-primary" />
+                                <SelectValue placeholder="All active roles" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All active roles</SelectItem>
+                                {jobs.map((job) => (
+                                    <SelectItem key={job.id} value={job.id}>{job.title}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        <Link to="/company/talent-pool">
+                            <Button className="h-10 gap-2 shadow-sm">
+                                <Plus className="h-4 w-4" /> Add candidate
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <MetricCard label="Candidates in flow" value={`${filteredApps.length}`} icon={<Users className="h-4 w-4 text-primary" />} />
+                <MetricCard label="Interview stage" value={`${stageCounts.INTERVIEW}`} icon={<Target className="h-4 w-4 text-primary" />} />
+                <MetricCard label="Hiring Conversion" value={`${conversionRate}%`} icon={<TrendingUp className="h-4 w-4 text-primary" />} />
+                <MetricCard label="Hired" value={`${stageCounts.HIRED}`} icon={<Sparkles className="h-4 w-4 text-primary" />} />
+            </section>
+
+            <div className="rounded-2xl border border-border/60 bg-card/60 p-5 shadow-sm">
+                <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <p className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <Filter className="h-4 w-4 text-primary" /> Drag and drop candidates across hiring stages
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="relative w-[280px]">
+                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="h-9 pl-9 text-xs"
+                                placeholder="Search candidate or role..."
+                            />
+                        </div>
+
+                        <Select
+                            value={focusStage}
+                            onValueChange={(stage) => {
+                                const nextJob = filterJobId !== "all" ? { jobId: filterJobId } : {};
+                                setSearchParams(stage === "all" ? nextJob : { ...nextJob, stage });
+                            }}
+                        >
+                            <SelectTrigger className="h-9 w-[160px] text-xs">
+                                <SelectValue placeholder="Focus stage" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Stages</SelectItem>
+                                {STAGES.map((stage) => (
+                                    <SelectItem key={stage} value={stage}>{STAGE_CONFIG[stage].label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
 
-                <div className="grid gap-2 md:grid-cols-[1.2fr_1fr_1fr]">
-                    <div className="relative">
-                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9"
-                            placeholder="Search candidate or role..."
-                        />
-                    </div>
-                    <Select
-                        value={filterJobId}
-                        onValueChange={(val) => {
-                            const nextStage = focusStage !== "all" ? { stage: focusStage } : {};
-                            setSearchParams(val === "all" ? nextStage : { ...nextStage, jobId: val });
-                        }}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Filter by Job" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Jobs</SelectItem>
-                            {jobs.map(job => (
-                                <SelectItem key={job.id} value={job.id}>{job.title}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    <Select
-                        value={focusStage}
-                        onValueChange={(stage) => {
-                            const nextJob = filterJobId !== "all" ? { jobId: filterJobId } : {};
-                            setSearchParams(stage === "all" ? nextJob : { ...nextJob, stage });
-                        }}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Focus stage" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Stages</SelectItem>
-                            {STAGES.map((stage) => (
-                                <SelectItem key={stage} value={stage}>{STAGE_CONFIG[stage].label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="mb-6 flex flex-wrap items-center gap-1.5">
                     <StageQuickFilter active={focusStage === "all"} onClick={() => setSearchParams(filterJobId === "all" ? {} : { jobId: filterJobId })} label="All" />
                     {STAGES.map((stage) => (
                         <StageQuickFilter
@@ -390,92 +564,92 @@ export default function CompanyApplicantsPage() {
                         />
                     ))}
                 </div>
-            </div>
 
-            <DndContext
-                sensors={sensors}
-                collisionDetection={closestCorners}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDragEnd={handleDragEnd}
-            >
-                <div className="flex-1 overflow-x-auto min-h-0">
-                    <div className="flex gap-4 min-w-max h-full pb-4 px-1">
-                        {STAGES.map(stage => (
-                            <div data-testid={`ats-column-${stage.toLowerCase()}`} key={stage} className={`w-[280px] flex-shrink-0 flex flex-col rounded-lg border bg-slate-50/50 ${//columns[stage].length === 0 ? 'opacity-70' : ''
-                                ""
-                                }`}>
-                                <div className={`p-3 rounded-t-lg border-b bg-white flex items-center justify-between sticky top-0 z-10`}>
-                                    <div className="flex items-center gap-2">
-                                        <div className={`h-2 w-2 rounded-full ${STAGE_CONFIG[stage].color.replace('bg-', 'bg-').replace('100', '500')}`} />
-                                        <span className="font-semibold text-sm">{STAGE_CONFIG[stage].label}</span>
-                                    </div>
-                                    <Badge variant="secondary" className="text-[10px] h-5">{columns[stage].length}</Badge>
-                                </div>
-
-                                <SortableContext
-                                    id={stage} // This allows dropping onto empty columns
-                                    items={columns[stage].map(a => a.id)}
-                                    strategy={verticalListSortingStrategy}
-                                >
-                                    <div className="flex-1 p-2 overflow-y-auto min-h-[150px]">
-                                        {columns[stage].map(app => (
-                                            <SortableItem
-                                                key={app.id}
-                                                id={app.id}
-                                                application={app}
-                                                profile={profiles[app.talent_id]}
-                                                talent={talentProfiles[app.talent_id]}
-                                                job={jobs.find(j => j.id === app.job_id)}
-                                                onSchedule={() => { setSelectedApp(app); setInterviewOpen(true); }}
-                                            />
-                                        ))}
-                                        {columns[stage].length === 0 && (
-                                            <div className="h-full flex items-center justify-center text-xs text-muted-foreground/50 italic py-8 border-2 border-dashed border-slate-200 rounded-md">
-                                                Drop here
-                                            </div>
-                                        )}
-                                    </div>
-                                </SortableContext>
-                            </div>
-                        ))}
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCorners}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                    modifiers={[restrictToWindowEdges, snapCenterToCursor]}
+                >
+                    <div className="overflow-x-auto overflow-y-hidden">
+                        <div className="flex h-full min-w-[1400px] gap-4 pb-4 px-1">
+                            {STAGES.map((stage) => (
+                                <ApplicantColumn
+                                    key={stage}
+                                    stage={stage}
+                                    applications={columns[stage]}
+                                    profiles={profiles}
+                                    talentProfiles={talentProfiles}
+                                    jobs={jobs}
+                                    onSchedule={(app) => { setSelectedApp(app); setInterviewOpen(true); }}
+                                    agentInsights={agentInsights}
+                                />
+                            ))}
+                        </div>
                     </div>
-                </div>
 
-                <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.5' } } }) }}>
-                    {activeId ? (
-                        <Card className="w-[260px] shadow-xl rotate-2 opacity-80 cursor-grabbing">
-                            <CardContent className="p-3">
-                                <div className="flex items-center gap-2">
-                                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">...</div>
-                                    <div>
-                                        <h4 className="font-medium text-sm">Moving Candidate...</h4>
+                    <DragOverlay dropAnimation={defaultDropAnimation}>
+                        {activeId ? (() => {
+                            const activeApp = applications.find(a => a.id === activeId);
+                            const activeProfile = activeApp ? profiles[activeApp.talent_id] : null;
+                            const activeJob = activeApp ? jobs.find(j => j.id === activeApp.job_id) : null;
+
+                            return (
+                                <Card className="w-[300px] border-primary/60 p-3 opacity-95 shadow-2xl ring-2 ring-primary/20 bg-white border-2 z-[9999] pointer-events-none">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border border-primary/20">
+                                            {(activeProfile?.full_name?.[0] || "U").toUpperCase()}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-bold text-sm text-foreground truncate">
+                                                {activeProfile?.full_name || "Unknown Candidate"}
+                                            </h4>
+                                            <p className="text-[10px] text-muted-foreground truncate uppercase font-bold tracking-tight">
+                                                Moving candidate...
+                                            </p>
+                                            {activeJob && (
+                                                <p className="text-[9px] text-primary font-medium truncate mt-0.5">
+                                                    {activeJob.title}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ) : null}
-                </DragOverlay>
+                                </Card>
+                            );
+                        })() : null}
+                    </DragOverlay>
+                </DndContext>
 
-            </DndContext>
-
-            <InterviewModal
-                open={interviewOpen}
-                onOpenChange={setInterviewOpen}
-                applicationId={selectedApp?.id ?? null}
-                onScheduled={() => {
-                    if (selectedApp) {
-                        // Optimistically update to INTERVIEW if not already
-                        if (selectedApp.stage !== 'INTERVIEW') {
-                            setApplications(prev => prev.map(a =>
-                                a.id === selectedApp.id ? { ...a, stage: 'INTERVIEW' } : a
+                <InterviewModal
+                    open={interviewOpen}
+                    onOpenChange={setInterviewOpen}
+                    applicationId={selectedApp?.id ?? null}
+                    onScheduled={() => {
+                        if (selectedApp && selectedApp.stage !== "INTERVIEW") {
+                            setApplications((prev) => prev.map((a) =>
+                                a.id === selectedApp.id ? { ...a, stage: "INTERVIEW" } : a
                             ));
-                            mvp.updateApplicationStage(selectedApp.id, 'INTERVIEW').catch(console.error);
+                            mvp.updateApplicationStage(selectedApp.id, "INTERVIEW").catch(console.error);
                         }
-                    }
-                }}
-            />
+                    }}
+                />
+            </div>
         </div>
+    );
+}
+
+function MetricCard({ label, value, icon }: { label: string; value: string; icon: ReactNode }) {
+    return (
+        <Card className="border-border/60 shadow-sm transition-all hover:shadow-md">
+            <CardContent className="flex items-center justify-between p-4">
+                <div>
+                    <p className="text-[11px] uppercase font-bold tracking-wider text-muted-foreground">{label}</p>
+                    <p className="mt-1 text-2xl font-black tracking-tight text-foreground">{value}</p>
+                </div>
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-2.5 text-primary shadow-sm">{icon}</div>
+            </CardContent>
+        </Card>
     );
 }
 
@@ -502,8 +676,8 @@ function StageQuickFilter({
             type="button"
             onClick={onClick}
             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors ${active
-                    ? "border-primary/40 bg-primary/10 text-primary"
-                    : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
+                ? "border-primary/40 bg-primary/10 text-primary"
+                : "border-border/60 bg-card text-muted-foreground hover:text-foreground"
                 }`}
         >
             <Circle className={`h-2.5 w-2.5 ${active ? "fill-current" : ""}`} />

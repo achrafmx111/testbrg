@@ -10,9 +10,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { mvp } from "@/integrations/supabase/mvp";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Mail, Loader2, MessageSquare } from "lucide-react";
+import { Check, X, Mail, Loader2, MessageSquare, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { logSecurityEvent } from "@/lib/auditLogger";
 
@@ -20,21 +21,22 @@ export const AdminMessagingQueue = () => {
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
     const [messages, setMessages] = useState<any[]>([]);
+    const [messagingEnabled, setMessagingEnabled] = useState(true);
 
     const fetchPendingMessages = useCallback(async () => {
         setLoading(true);
         try {
-            const { data, error } = await (supabase as any)
-                .from('recruitment_messages')
-                .select('*, application:applications(name, email), employer:profiles(email)')
-                .eq('status', 'pending_review')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
+            const data = await mvp.listRecruitmentMessages('pending_review');
             setMessages(data || []);
+            setMessagingEnabled(true);
         } catch (error) {
             console.error("Error fetching messages:", error);
-            toast({ variant: "destructive", title: "Failed to load messages" });
+            const isTableMissing = String(error).includes("recruitment_messages") || (error as any).code === "PGRST205";
+            if (isTableMissing) {
+                setMessagingEnabled(false);
+            } else {
+                toast({ variant: "destructive", title: "Failed to load messages" });
+            }
         } finally {
             setLoading(false);
         }
@@ -43,16 +45,11 @@ export const AdminMessagingQueue = () => {
     const handleAction = async (messageId: string, action: 'approved_and_sent' | 'rejected') => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
-            const { error } = await (supabase as any)
-                .from('recruitment_messages')
-                .update({
-                    status: action,
-                    reviewed_at: new Date().toISOString(),
-                    reviewed_by: user?.id
-                })
-                .eq('id', messageId);
-
-            if (error) throw error;
+            await mvp.updateRecruitmentMessage(messageId, {
+                status: action,
+                reviewed_at: new Date().toISOString(),
+                reviewed_by: user?.id
+            });
 
             toast({
                 title: action === 'approved_and_sent' ? "Message Approved" : "Message Rejected",
@@ -63,7 +60,7 @@ export const AdminMessagingQueue = () => {
             const msg = messages.find(m => m.id === messageId);
             if (msg) {
                 // Application activity log (Business context)
-                await (supabase as any).from('application_activity_logs').insert({
+                await mvp.createActivityLog({
                     application_id: msg.application_id,
                     activity_type: action === 'approved_and_sent' ? 'message_approved' : 'message_rejected',
                     description: `Admin ${action === 'approved_and_sent' ? 'approved' : 'rejected'} a message from employer.`,
@@ -119,7 +116,16 @@ export const AdminMessagingQueue = () => {
                 </div>
             </CardHeader>
             <CardContent>
-                {messages.length === 0 ? (
+                {!messagingEnabled ? (
+                    <div className="text-center py-20 bg-amber-50/20 rounded-xl border-2 border-dashed border-amber-200">
+                        <AlertTriangle className="h-10 w-10 mx-auto mb-4 text-amber-500" />
+                        <p className="text-amber-700 font-medium">Database Structure Incomplete</p>
+                        <p className="text-amber-600 text-sm mt-1 max-w-md mx-auto">
+                            The <code>recruitment_messages</code> table is missing from the <code>mvp</code> schema.
+                            Please apply the latest migrations to enable messaging compliance tracking.
+                        </p>
+                    </div>
+                ) : messages.length === 0 ? (
                     <div className="text-center py-20 bg-muted/20 rounded-xl border-2 border-dashed">
                         <MessageSquare className="h-10 w-10 mx-auto mb-4 opacity-20" />
                         <p className="text-muted-foreground">No messages pending review.</p>

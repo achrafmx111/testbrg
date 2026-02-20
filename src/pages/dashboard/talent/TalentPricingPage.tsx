@@ -31,10 +31,10 @@ export default function TalentPricingPage() {
         <div className="p-6 max-w-7xl mx-auto space-y-12 animate-in fade-in duration-500">
             {/* Header */}
             <div className="text-center space-y-4 max-w-2xl mx-auto">
-                <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200">
+                <Badge variant="secondary" className="bg-primary/10 text-primary">
                     Premium Membership
                 </Badge>
-                <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
                     Accelerate Your Career
                 </h1>
                 <p className="text-xl text-muted-foreground">
@@ -90,16 +90,16 @@ export default function TalentPricingPage() {
                     whileHover={{ y: -5 }}
                     className="relative"
                 >
-                    <div className="absolute -inset-[2px] rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-70 blur-sm pointer-events-none" />
-                    <Card className="relative border-indigo-200 shadow-xl bg-white/95 backdrop-blur-sm">
+                    <div className="absolute -inset-[2px] rounded-xl bg-gradient-to-r from-primary via-secondary to-accent opacity-70 blur-sm pointer-events-none" />
+                    <Card className="relative border-primary/30 shadow-xl bg-background/95 backdrop-blur-sm">
                         <div className="absolute top-0 right-0 p-3">
-                            <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 border-none">
+                            <Badge className="bg-gradient-to-r from-primary to-secondary border-none">
                                 RECOMMENDED
                             </Badge>
                         </div>
                         <CardHeader>
                             <CardTitle className="text-2xl flex items-center gap-2">
-                                Pro <Crown className="h-6 w-6 text-yellow-500 fill-yellow-500" />
+                                Pro <Crown className="h-6 w-6 text-secondary fill-secondary" />
                             </CardTitle>
                             <CardDescription>For serious career acceleration</CardDescription>
                             <div className="mt-4 flex items-baseline gap-1">
@@ -110,33 +110,33 @@ export default function TalentPricingPage() {
                         <CardContent className="space-y-4">
                             <ul className="space-y-3 text-sm font-medium">
                                 <li className="flex items-center gap-2">
-                                    <div className="h-5 w-5 rounded-full bg-indigo-100 flex items-center justify-center">
-                                        <Check className="h-3 w-3 text-indigo-600" />
+                                    <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <Check className="h-3 w-3 text-primary" />
                                     </div>
                                     <span>Everything in Standard</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <div className="h-5 w-5 rounded-full bg-indigo-100 flex items-center justify-center">
-                                        <Zap className="h-3 w-3 text-indigo-600" />
+                                    <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <Zap className="h-3 w-3 text-primary" />
                                     </div>
                                     <span>Unlimited Job Applications</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <div className="h-5 w-5 rounded-full bg-indigo-100 flex items-center justify-center">
-                                        <Sparkles className="h-3 w-3 text-indigo-600" />
+                                    <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <Sparkles className="h-3 w-3 text-primary" />
                                     </div>
                                     <span>Advanced AI Voice Coach (Early Access)</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <div className="h-5 w-5 rounded-full bg-indigo-100 flex items-center justify-center">
-                                        <Shield className="h-3 w-3 text-indigo-600" />
+                                    <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <Shield className="h-3 w-3 text-primary" />
                                     </div>
                                     <span>Verified Pro Badge 💎</span>
                                 </li>
                             </ul>
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200" onClick={handleUpgrade}>
+                            <Button className="w-full shadow-lg shadow-primary/20" onClick={handleUpgrade}>
                                 Upgrade to Pro
                             </Button>
                         </CardFooter>
@@ -146,18 +146,18 @@ export default function TalentPricingPage() {
 
             {/* Features Breakdown */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto pt-10">
-                <div className="bg-slate-50 p-6 rounded-2xl">
+                <div className="bg-muted/40 p-6 rounded-2xl">
                     <Zap className="h-8 w-8 text-yellow-500 mb-4" />
                     <h3 className="font-semibold mb-2">Faster Applications</h3>
                     <p className="text-sm text-muted-foreground">Apply to unlimited jobs with one click. No more daily limits holding you back.</p>
                 </div>
-                <div className="bg-slate-50 p-6 rounded-2xl">
+                <div className="bg-muted/40 p-6 rounded-2xl">
                     <Shield className="h-8 w-8 text-emerald-500 mb-4" />
                     <h3 className="font-semibold mb-2">Verified Status</h3>
                     <p className="text-sm text-muted-foreground">Stand out to recruiters with a verified badge that signals your serious intent.</p>
                 </div>
-                <div className="bg-slate-50 p-6 rounded-2xl">
-                    <Sparkles className="h-8 w-8 text-indigo-500 mb-4" />
+                <div className="bg-muted/40 p-6 rounded-2xl">
+                    <Sparkles className="h-8 w-8 text-primary mb-4" />
                     <h3 className="font-semibold mb-2">AI Preparation</h3>
                     <p className="text-sm text-muted-foreground">Get unlimited access to our advanced Interview Coach and resume analysis tools.</p>
                 </div>
@@ -174,12 +174,12 @@ export default function TalentPricingPage() {
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
-                        <div className="p-4 bg-indigo-50 rounded-lg flex justify-between items-center border border-indigo-100">
+                        <div className="p-4 bg-primary/5 rounded-lg flex justify-between items-center border border-primary/20">
                             <div>
-                                <p className="font-medium text-indigo-900">Bridging Academy Pro</p>
-                                <p className="text-sm text-indigo-600">Monthly Subscription</p>
+                                <p className="font-medium text-foreground">Bridging Academy Pro</p>
+                                <p className="text-sm text-muted-foreground">Monthly Subscription</p>
                             </div>
-                            <p className="font-bold text-lg text-indigo-900">€19.00</p>
+                            <p className="font-bold text-lg text-foreground">€19.00</p>
                         </div>
 
                         {/* Mock Card Form */}
@@ -211,7 +211,7 @@ export default function TalentPricingPage() {
                     </div>
 
                     <DialogFooter>
-                        <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={confirmPayment} disabled={isProcessing}>
+                        <Button className="w-full" onClick={confirmPayment} disabled={isProcessing}>
                             {isProcessing ? "Processing..." : "Pay €19.00"}
                         </Button>
                     </DialogFooter>

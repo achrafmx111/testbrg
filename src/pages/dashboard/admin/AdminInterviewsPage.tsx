@@ -33,16 +33,15 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { supabase } from "@/integrations/supabase/client";
+import { mvp, MvpInterviewRequest } from "@/integrations/supabase/mvp";
 import { useToast } from "@/hooks/use-toast";
-import { InterviewRequest } from "@/types";
 import { AdminSectionHeader } from "@/components/admin/AdminPrimitives";
 import { adminClassTokens } from "@/components/admin/designTokens";
 
 export default function AdminInterviewsPage() {
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
-    const [interviews, setInterviews] = useState<InterviewRequest[]>([]);
+    const [interviews, setInterviews] = useState<MvpInterviewRequest[]>([]);
 
     // Table State
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -52,19 +51,8 @@ export default function AdminInterviewsPage() {
     const fetchInterviews = useCallback(async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from("interview_requests")
-                .select(`
-                    *,
-                    application:applications(id, name, course_name),
-                    company:companies(id, name, logo_url),
-                    talent:profiles!talent_id(id, first_name, last_name, email),
-                    recruiter:profiles!recruiter_id(id, first_name, last_name)
-                `)
-                .order("created_at", { ascending: false });
-
-            if (error) throw error;
-            setInterviews(data as unknown as InterviewRequest[]);
+            const data = await mvp.listInterviewRequests();
+            setInterviews(data);
         } catch (error) {
             console.error("Error fetching interviews:", error);
             toast({ variant: "destructive", title: "Error", description: "Failed to load interviews." });
@@ -79,13 +67,7 @@ export default function AdminInterviewsPage() {
 
     const updateStatus = async (id: string, newStatus: string) => {
         try {
-            const { error } = await supabase
-                .from("interview_requests")
-                .update({ status: newStatus })
-                .eq("id", id);
-
-            if (error) throw error;
-
+            await mvp.updateInterviewStatus(id, newStatus);
             toast({ title: "Updated", description: `Interview marked as ${newStatus}.` });
             setInterviews(prev => prev.map(i => i.id === id ? { ...i, status: newStatus as any } : i));
         } catch (error) {
@@ -93,7 +75,7 @@ export default function AdminInterviewsPage() {
         }
     };
 
-    const columns: ColumnDef<InterviewRequest>[] = [
+    const columns: ColumnDef<MvpInterviewRequest>[] = [
         {
             accessorKey: "company.name",
             id: "companyName",
@@ -115,11 +97,11 @@ export default function AdminInterviewsPage() {
             header: "Candidate",
             cell: ({ row }) => {
                 const talent = row.original.talent;
-                const app = row.original.application;
+                const app = row.original.application as any;
                 return (
                     <div className="flex flex-col">
-                        <span className="font-medium text-sm">{talent?.first_name} {talent?.last_name}</span>
-                        <span className="text-[10px] text-muted-foreground">{app?.course_name || "Talent Pool"}</span>
+                        <span className="font-medium text-sm">{talent?.full_name || "Unknown Talent"}</span>
+                        <span className="text-[10px] text-muted-foreground">{app?.job?.title || "Talent Pool"}</span>
                     </div>
                 );
             }
@@ -210,9 +192,9 @@ export default function AdminInterviewsPage() {
                             <CardDescription>Monitor approvals and schedules.</CardDescription>
                         </div>
                         <Input
-                            placeholder="Search..."
-                            value={(table.getColumn("company.name")?.getFilterValue() as string) ?? ""}
-                            onChange={(event) => table.getColumn("company.name")?.setFilterValue(event.target.value)}
+                            placeholder="Search by company..."
+                            value={(table.getColumn("companyName")?.getFilterValue() as string) ?? ""}
+                            onChange={(event) => table.getColumn("companyName")?.setFilterValue(event.target.value)}
                             className="max-w-sm"
                         />
                     </div>

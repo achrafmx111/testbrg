@@ -82,7 +82,7 @@ export default function CommunityPage() {
                             Defy a Friend
                         </Link>
                     </Button>
-                    <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+                    <Button className="gap-2">
                         <MessageSquare className="h-4 w-4" />
                         New Post
                     </Button>
@@ -152,7 +152,7 @@ export default function CommunityPage() {
                                     <div className="flex-1 p-6 flex flex-col justify-between">
                                         <div>
                                             <div className="flex justify-between items-start mb-2">
-                                                <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">{event.type}</Badge>
+                                                <Badge variant="secondary" className="bg-primary/10 text-primary">{event.type}</Badge>
                                                 <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                                                     <Users className="h-3 w-3" /> {event.attendees} going
                                                 </span>
@@ -176,7 +176,7 @@ export default function CommunityPage() {
                 {/* Sidebar Widgets */}
                 <div className="space-y-6">
                     {/* Leaderboard Preview */}
-                    <Card className="border-yellow-500/20 bg-gradient-to-br from-yellow-50/50 to-transparent">
+                    <Card className="border-secondary/20 bg-gradient-to-br from-secondary/10 to-transparent">
                         <CardHeader className="pb-3">
                             <CardTitle className="flex items-center gap-2 text-lg">
                                 <Trophy className="h-5 w-5 text-yellow-500" />
@@ -193,31 +193,31 @@ export default function CommunityPage() {
                                         <Avatar className="h-8 w-8">
                                             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
-                                        <span className={`text-sm font-medium ${user.isUser ? "text-indigo-600" : ""}`}>{user.name}</span>
+                                        <span className={`text-sm font-medium ${user.isUser ? "text-primary" : ""}`}>{user.name}</span>
                                     </div>
                                     <span className="text-xs font-bold text-muted-foreground">{user.xp.toLocaleString()} XP</span>
                                 </div>
                             ))}
-                            <Button asChild variant="ghost" size="sm" className="w-full text-indigo-600 hover:text-indigo-700">
+                            <Button asChild variant="ghost" size="sm" className="w-full text-primary hover:text-primary/80">
                                 <Link to="/talent/leaderboard">View Full Leaderboard <ArrowRight className="ml-1 h-3 w-3" /></Link>
                             </Button>
                         </CardContent>
                     </Card>
 
                     {/* Quiz Duel Promo */}
-                    <Card className="bg-slate-900 text-white overflow-hidden relative">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full blur-3xl opacity-20 translate-x-10 -translate-y-10" />
+                    <Card className="bg-card text-foreground overflow-hidden relative border-border/60">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary rounded-full blur-3xl opacity-20 translate-x-10 -translate-y-10" />
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-lg">
-                                <Swords className="h-5 w-5 text-indigo-400" />
+                                <Swords className="h-5 w-5 text-primary" />
                                 Daily Challenge
                             </CardTitle>
-                            <CardDescription className="text-slate-400">
+                            <CardDescription>
                                 Win 50 XP in a quick 1v1 battle!
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Button asChild className="w-full bg-indigo-500 hover:bg-indigo-600">
+                            <Button asChild className="w-full">
                                 <Link to="/talent/duel">Terminer Le Challenge</Link>
                             </Button>
                         </CardContent>

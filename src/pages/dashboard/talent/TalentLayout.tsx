@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, Link, useLocation, Outlet } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +26,8 @@ import {
   Crown,
   ChevronDown,
   TrendingUp,
-  Globe
+  Globe,
+  LayoutTemplate
 } from "lucide-react";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { cn } from "@/lib/utils";
@@ -63,6 +65,7 @@ const talentNavGroups: SidebarItem[] = [
       { label: "Job Board", to: "jobs", icon: Briefcase },
       { label: "Applications", to: "applications", icon: FileText },
       { label: "AI CV Analyzer", to: "resume-analysis", icon: FileText },
+      { label: "Resume Builder", to: "resume-builder", icon: LayoutTemplate },
       { label: "LinkedIn Optimizer", to: "linkedin-optimizer", icon: TrendingUp },
     ]
   },
@@ -151,7 +154,7 @@ export default function TalentLayout() {
       )}>
         <div className="flex h-16 items-center border-b px-6 justify-between bg-muted/20">
           <Link to="/talent" className="flex items-center gap-2 font-bold text-xl tracking-tight">
-            <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Bridging</span>
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Bridging</span>
             <span className="text-foreground">Academy</span>
           </Link>
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsSidebarOpen(false)}>
@@ -271,7 +274,7 @@ export default function TalentLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-muted/20">
         {/* Mobile Header */}
         <header className="md:hidden flex h-16 items-center gap-4 border-b bg-background px-6 sticky top-0 z-40 shadow-sm">
           <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(true)}>

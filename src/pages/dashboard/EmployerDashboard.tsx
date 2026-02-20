@@ -50,6 +50,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { mvpSchema } from "@/integrations/supabase/mvp";
+
 
 type PipelineStage = "shortlisted" | "interview_requested" | "hired" | "rejected";
 
@@ -106,7 +108,7 @@ const EmployerDashboard = () => {
         setLoading(true);
         try {
             // Fetch only talent_pool_registration type
-            const { data, error } = await (supabase as any)
+            const { data, error } = await mvpSchema
                 .from('applications')
                 .select('*')
                 .eq('type', 'talent_pool_registration')
@@ -130,13 +132,8 @@ const EmployerDashboard = () => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
-            const { data, error } = await (supabase as any)
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single();
-            if (error) throw error;
-            setUserProfile(data);
+            const profile = await mvp.getMyProfile(user.id);
+            setUserProfile(profile);
         } catch (error) {
             console.error("Error fetching profile:", error);
         }
@@ -147,27 +144,20 @@ const EmployerDashboard = () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            const { data, error } = await (supabase as any)
-                .from('employer_favorites')
-                .select('*')
-                .eq('employer_id', user.id);
+            const data = await mvp.listFavorites(user.id);
 
-            if (error) throw error;
             const favMap: { [key: string]: EmployerFavorite } = {};
             (data || []).forEach((f: any) => {
-                favMap[f.application_id] = {
-                    application_id: f.application_id,
+                favMap[f.talent_id] = {
+                    talent_id: f.talent_id,
                     employer_id: f.employer_id,
                     notes: f.notes || "",
                     pipeline_status: f.pipeline_status || "shortlisted"
                 };
             });
 
-            if ((data || []).length > 0) {
-                setSupportsPipelineStatus(Object.prototype.hasOwnProperty.call(data[0], "pipeline_status"));
-                setSupportsNotes(Object.prototype.hasOwnProperty.call(data[0], "notes"));
-            }
-
+            setSupportsPipelineStatus(true);
+            setSupportsNotes(true);
             setFavorites(favMap);
         } catch (error) {
             console.error("Error fetching favorites:", error);
@@ -185,7 +175,7 @@ const EmployerDashboard = () => {
         init();
     }, [fetchTalent, fetchFavorites, fetchUserProfile]);
 
-    const toggleFavorite = async (applicationId: string) => {
+    const toggleFavorite = async (talentId: string) => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
@@ -193,61 +183,26 @@ const EmployerDashboard = () => {
                 return;
             }
 
-            const isFav = !!favorites[applicationId];
+            const isNowFav = await mvp.toggleFavorite(user.id, talentId);
 
-            if (isFav) {
-                const { error } = await (supabase as any)
-                    .from('employer_favorites')
-                    .delete()
-                    .eq('employer_id', user.id)
-                    .eq('application_id', applicationId);
-
-                if (error) throw error;
-
-                setFavorites(prev => {
-                    const newFavs = { ...prev };
-                    delete newFavs[applicationId];
-                    return newFavs;
-                });
-                toast({ title: "Removed from shortlist" });
-            } else {
-                const insertPayload: any = {
-                    employer_id: user.id,
-                    application_id: applicationId,
-                };
-
-                if (supportsPipelineStatus) {
-                    insertPayload.pipeline_status = 'shortlisted';
-                }
-
-                const { error } = await (supabase as any)
-                    .from('employer_favorites')
-                    .upsert(insertPayload, { onConflict: 'employer_id,application_id' });
-
-                let finalError = error;
-                if (finalError && isMissingColumnError(finalError, "pipeline_status")) {
-                    setSupportsPipelineStatus(false);
-                    const retry = await (supabase as any)
-                        .from('employer_favorites')
-                        .upsert({
-                            employer_id: user.id,
-                            application_id: applicationId,
-                        }, { onConflict: 'employer_id,application_id' });
-                    finalError = retry.error;
-                }
-
-                if (finalError) throw finalError;
-
+            if (isNowFav) {
                 setFavorites(prev => ({
                     ...prev,
-                    [applicationId]: {
-                        application_id: applicationId,
+                    [talentId]: {
+                        talent_id: talentId,
                         employer_id: user.id,
                         notes: "",
                         pipeline_status: "shortlisted"
                     }
                 }));
                 toast({ title: "Added to shortlist" });
+            } else {
+                setFavorites(prev => {
+                    const newFavs = { ...prev };
+                    delete newFavs[talentId];
+                    return newFavs;
+                });
+                toast({ title: "Removed from shortlist" });
             }
         } catch (error: any) {
             console.error("Error toggling favorite:", error);
@@ -259,54 +214,33 @@ const EmployerDashboard = () => {
         }
     };
 
-    const updatePipelineStatus = async (applicationId: string, status: string) => {
+    const updatePipelineStatus = async (talentId: string, status: string) => {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            if (!supportsPipelineStatus) {
-                setFavorites(prev => ({
-                    ...prev,
-                    [applicationId]: { ...prev[applicationId], pipeline_status: status }
-                }));
-                toast({
-                    title: "Stage updated locally",
-                    description: "Pipeline column is missing in DB, so stage will reset after refresh."
-                });
-                return;
-            }
+            // Find favorite record ID
+            const favorite = favorites[talentId];
+            if (!favorite) return;
 
-            const payload: any = {
-                employer_id: user.id,
-                application_id: applicationId,
-                pipeline_status: status,
-            };
-            if (supportsNotes) {
-                payload.notes = favorites[applicationId]?.notes || "";
-            }
+            // We need the numeric/UUID ID from the database record, but my mvp call uses talent_id filter
+            // Let's refine mvp.updateFavoriteStatus to accept employer_id and talent_id if needed, 
+            // but for now I'll fetch the record first or update by composite key.
 
-            const { error } = await (supabase as any)
+            const { data: favRecord } = await mvpSchema
                 .from('employer_favorites')
-                .upsert(payload, { onConflict: 'employer_id,application_id' });
+                .select('id')
+                .eq('employer_id', user.id)
+                .eq('talent_id', talentId)
+                .maybeSingle();
 
-            if (error && isMissingColumnError(error, "pipeline_status")) {
-                setSupportsPipelineStatus(false);
-                setFavorites(prev => ({
-                    ...prev,
-                    [applicationId]: { ...prev[applicationId], pipeline_status: status }
-                }));
-                toast({
-                    title: "Stage updated locally",
-                    description: "Pipeline column is missing in DB, so stage will reset after refresh."
-                });
-                return;
+            if (favRecord) {
+                await mvp.updateFavoriteStatus(favRecord.id, status);
             }
-
-            if (error) throw error;
 
             setFavorites(prev => ({
                 ...prev,
-                [applicationId]: { ...prev[applicationId], pipeline_status: status }
+                [talentId]: { ...prev[talentId], pipeline_status: status }
             }));
             toast({ title: `Status updated to ${status}` });
         } catch (error) {
@@ -345,7 +279,7 @@ const EmployerDashboard = () => {
             if (!user) return;
 
             // 1. Create formal request
-            const { error: reqError } = await (supabase as any)
+            const { error: reqError } = await mvpSchema
                 .from('interview_requests')
                 .insert({
                     employer_id: user.id,
@@ -401,7 +335,7 @@ const EmployerDashboard = () => {
 
     const fetchActivityLogs = async (id: string) => {
         try {
-            const { data, error } = await (supabase as any)
+            const { data, error } = await mvpSchema
                 .from('application_activity_logs')
                 .select('*')
                 .eq('application_id', id)
@@ -414,58 +348,27 @@ const EmployerDashboard = () => {
         }
     };
 
-    const saveNote = async (applicationId: string, note: string) => {
+    const saveNote = async (talentId: string, note: string) => {
         setIsSavingNote(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            if (!supportsNotes) {
-                setFavorites(prev => ({
-                    ...prev,
-                    [applicationId]: { ...prev[applicationId], notes: note }
-                }));
-                setEditingNote(null);
-                toast({
-                    title: "Note saved locally",
-                    description: "Notes column is missing in DB, so note will reset after refresh."
-                });
-                return;
-            }
-
-            const payload: any = {
-                employer_id: user.id,
-                application_id: applicationId,
-                notes: note
-            };
-            if (supportsPipelineStatus) {
-                payload.pipeline_status = favorites[applicationId]?.pipeline_status || 'shortlisted';
-            }
-
-            const { error } = await (supabase as any)
+            // Find favorite record ID
+            const { data: favRecord } = await mvpSchema
                 .from('employer_favorites')
-                .upsert(payload, { onConflict: 'employer_id,application_id' });
+                .select('id')
+                .eq('employer_id', user.id)
+                .eq('talent_id', talentId)
+                .maybeSingle();
 
-            const finalError = error;
-
-            if (finalError && isMissingColumnError(finalError, "notes")) {
-                setSupportsNotes(false);
-                setFavorites(prev => ({
-                    ...prev,
-                    [applicationId]: { ...prev[applicationId], notes: note }
-                }));
-                setEditingNote(null);
-                toast({
-                    title: "Note saved locally",
-                    description: "Notes column is missing in DB, so note will reset after refresh."
-                });
-                return;
+            if (favRecord) {
+                await mvp.updateFavoriteNote(favRecord.id, note);
             }
 
-            if (finalError) throw finalError;
             setFavorites(prev => ({
                 ...prev,
-                [applicationId]: { ...prev[applicationId], notes: note }
+                [talentId]: { ...prev[talentId], notes: note }
             }));
             setEditingNote(null);
             toast({ title: "Note saved" });
@@ -491,11 +394,11 @@ const EmployerDashboard = () => {
 
         const matchesTrack = trackFilter === "all" || item.sap_track === trackFilter;
         const matchesGerman = germanFilter === "all" || (item.german_level && item.german_level >= germanFilter);
-        const matchesShortlist = !showShortlistOnly || !!favorites[item.id];
+        const matchesShortlist = !showShortlistOnly || !!favorites[item.talent_id];
         const matchesPipelineStage =
             !showShortlistOnly ||
             pipelineStageFilter === "all" ||
-            (favorites[item.id] && favorites[item.id].pipeline_status === pipelineStageFilter);
+            (favorites[item.talent_id] && favorites[item.talent_id].pipeline_status === pipelineStageFilter);
 
         const readiness = calculateJobReadyScore(item);
         const matchesReadiness =
@@ -525,19 +428,19 @@ const EmployerDashboard = () => {
     // Readiness KPI (Phase 7/8 Flywheel)
     const jobReadyCount = talent.filter(t => calculateJobReadyScore(t).score >= 80).length;
 
-    const shortlistedTalent = filteredTalent.filter((candidate) => !!favorites[candidate.id]);
+    const shortlistedTalent = filteredTalent.filter((candidate) => !!favorites[candidate.talent_id]);
     const topCandidates = filteredTalent.slice(0, 5);
     const kanbanColumns: Record<PipelineStage, TalentProfile[]> = {
-        shortlisted: shortlistedTalent.filter((candidate) => (favorites[candidate.id]?.pipeline_status || "shortlisted") === "shortlisted"),
-        interview_requested: shortlistedTalent.filter((candidate) => favorites[candidate.id]?.pipeline_status === "interview_requested"),
-        hired: shortlistedTalent.filter((candidate) => favorites[candidate.id]?.pipeline_status === "hired"),
-        rejected: shortlistedTalent.filter((candidate) => favorites[candidate.id]?.pipeline_status === "rejected"),
+        shortlisted: shortlistedTalent.filter((candidate) => (favorites[candidate.talent_id]?.pipeline_status || "shortlisted") === "shortlisted"),
+        interview_requested: shortlistedTalent.filter((candidate) => favorites[candidate.talent_id]?.pipeline_status === "interview_requested"),
+        hired: shortlistedTalent.filter((candidate) => favorites[candidate.talent_id]?.pipeline_status === "hired"),
+        rejected: shortlistedTalent.filter((candidate) => favorites[candidate.talent_id]?.pipeline_status === "rejected"),
     };
 
-    const moveToNextStage = (candidateId: string) => {
-        const current = favorites[candidateId]?.pipeline_status || "shortlisted";
-        if (current === "shortlisted") updatePipelineStatus(candidateId, "interview_requested");
-        if (current === "interview_requested") updatePipelineStatus(candidateId, "hired");
+    const moveToNextStage = (talentId: string) => {
+        const current = favorites[talentId]?.pipeline_status || "shortlisted";
+        if (current === "shortlisted") updatePipelineStatus(talentId, "interview_requested");
+        if (current === "interview_requested") updatePipelineStatus(talentId, "hired");
     };
 
     const stageBreakdown = [
@@ -921,10 +824,10 @@ const EmployerDashboard = () => {
                                                 No candidates here
                                             </div>
                                         ) : stageCandidates.map((candidate) => (
-                                            <div key={candidate.id} className="rounded-lg border bg-white p-3 space-y-3 shadow-sm">
+                                            <div key={candidate.talent_id} className="rounded-lg border bg-white p-3 space-y-3 shadow-sm">
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div>
-                                                        <div className="text-sm font-semibold">Candidate #{candidate.id.slice(0, 5)}</div>
+                                                        <div className="text-sm font-semibold">Candidate #{candidate.talent_id.slice(0, 5)}</div>
                                                         <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1">
                                                             <Briefcase className="h-3 w-3" /> {candidate.sap_track || "General SAP"}
                                                         </div>
@@ -959,15 +862,15 @@ const EmployerDashboard = () => {
                                                         size="sm"
                                                         variant="outline"
                                                         className="h-7 text-xs"
-                                                        onClick={() => toggleFavorite(candidate.id)}
+                                                        onClick={() => toggleFavorite(candidate.talent_id)}
                                                     >
                                                         <Star className="h-3 w-3 mr-1" /> Remove
                                                     </Button>
                                                 </div>
 
                                                 <Select
-                                                    value={favorites[candidate.id]?.pipeline_status || "shortlisted"}
-                                                    onValueChange={(v) => updatePipelineStatus(candidate.id, v)}
+                                                    value={favorites[candidate.talent_id]?.pipeline_status || "shortlisted"}
+                                                    onValueChange={(v) => updatePipelineStatus(candidate.talent_id, v)}
                                                 >
                                                     <SelectTrigger className="h-8 text-xs">
                                                         <SelectValue placeholder="Stage" />
@@ -987,7 +890,7 @@ const EmployerDashboard = () => {
                                                         </Button>
                                                     )}
                                                     {(stage.key === "shortlisted" || stage.key === "interview_requested") && (
-                                                        <Button size="sm" variant="secondary" className="h-7 text-xs" onClick={() => moveToNextStage(candidate.id)}>
+                                                        <Button size="sm" variant="secondary" className="h-7 text-xs" onClick={() => moveToNextStage(candidate.talent_id)}>
                                                             <ArrowRight className="h-3 w-3 mr-1" /> Move
                                                         </Button>
                                                     )}
@@ -1004,9 +907,9 @@ const EmployerDashboard = () => {
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
                     {filteredTalent.map((candidate) => (
                         <CandidateCard
-                            key={candidate.id}
+                            key={candidate.talent_id}
                             candidate={candidate}
-                            favorite={favorites[candidate.id]}
+                            favorite={favorites[candidate.talent_id]}
                             onToggleFavorite={toggleFavorite}
                             onRequestInterview={handleOpenInterviewModal}
                             onViewProfile={(c) => {

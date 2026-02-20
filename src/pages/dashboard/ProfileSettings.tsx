@@ -18,6 +18,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { mvpSchema } from "@/integrations/supabase/mvp";
 import { Profile } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { logSecurityEvent } from "@/lib/auditLogger";
@@ -88,7 +89,7 @@ const ProfileSettings = ({ profile, onUpdate }: ProfileSettingsProps) => {
         setLoading(true);
 
         try {
-            const { error } = await supabase
+            const { error } = await mvpSchema
                 .from('profiles')
                 .update(formData)
                 .eq('id', profile.id);
@@ -126,12 +127,12 @@ const ProfileSettings = ({ profile, onUpdate }: ProfileSettingsProps) => {
                 { data: referrals },
                 { data: activityLogs }
             ] = await Promise.all([
-                supabase.from('applications').select('*').eq('user_id', profile?.id),
-                supabase.from('course_enrollments').select('*').eq('user_id', profile?.id),
-                supabase.from('interview_requests').select('*').eq('employer_id', profile?.id), // Or candidate side if applicable
-                supabase.from('employer_favorites').select('*').eq('user_id', profile?.id),
-                supabase.from('referrals').select('*').eq('referrer_id', profile?.id),
-                supabase.from('application_activity_logs').select('*').eq('actor_id', profile?.id)
+                mvpSchema.from('applications').select('*').eq('user_id', profile?.id),
+                mvpSchema.from('course_enrollments').select('*').eq('user_id', profile?.id),
+                mvpSchema.from('interview_requests').select('*').eq('employer_id', profile?.id), // Or candidate side if applicable
+                mvpSchema.from('employer_favorites').select('*').eq('user_id', profile?.id),
+                mvpSchema.from('referrals').select('*').eq('referrer_id', profile?.id),
+                mvpSchema.from('application_activity_logs').select('*').eq('actor_id', profile?.id)
             ]);
 
             const exportBundle = {
@@ -181,7 +182,7 @@ const ProfileSettings = ({ profile, onUpdate }: ProfileSettingsProps) => {
             const deletionDate = new Date();
             deletionDate.setDate(deletionDate.getDate() + 30);
 
-            const { error } = await supabase
+            const { error } = await mvpSchema
                 .from('profiles')
                 .update({
                     status: 'deleted',

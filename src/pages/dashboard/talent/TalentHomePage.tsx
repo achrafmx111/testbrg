@@ -11,10 +11,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { ArrowRight, Briefcase, CalendarCheck, GraduationCap, Target } from "lucide-react";
+import { ArrowRight, Briefcase, CalendarCheck, GraduationCap, Sparkles, Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const weeklyProgress = [
   { day: "Mon", learning: 42, applications: 2 },
@@ -49,9 +50,12 @@ const milestones = [
 export default function TalentHomePage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="rounded-2xl border border-border/60 bg-card p-5 md:p-6">
+      <div className="rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/10 p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
+            <Badge variant="secondary" className="mb-2 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]">
+              <Sparkles className="mr-1 h-3.5 w-3.5" /> Talent Command
+            </Badge>
             <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">Talent Dashboard</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Mock preview: your learning, readiness, and placement journey in one view.
@@ -140,7 +144,7 @@ export default function TalentHomePage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {recommendedJobs.map((job) => (
-              <div key={job.title} className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/10 px-4 py-3">
+              <div key={job.title} className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/10 px-4 py-3 cursor-pointer hover:bg-muted/20 transition-colors" onClick={() => toast.info(`Viewing details for ${job.title}`)}>
                 <div>
                   <p className="text-sm font-semibold text-foreground">{job.title}</p>
                   <p className="text-xs text-muted-foreground">{job.location}</p>

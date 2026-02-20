@@ -128,12 +128,12 @@ export default function DocumentVaultPage() {
                     </p>
                 </div>
 
-                <Card className="bg-slate-900 text-white border-slate-800 px-6 py-3 shadow-lg">
+                <Card className="bg-gradient-to-r from-card to-primary/10 text-foreground border-border/60 px-6 py-3 shadow-lg">
                     <div className="flex items-center gap-3">
-                        <Lock className="h-5 w-5 text-emerald-400" />
+                        <Lock className="h-5 w-5 text-primary" />
                         <div>
-                            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Security Level</p>
-                            <p className="font-bold text-emerald-400">AES-256 Encrypted</p>
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Security Level</p>
+                            <p className="font-bold text-primary">AES-256 Encrypted</p>
                         </div>
                     </div>
                 </Card>

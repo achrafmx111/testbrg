@@ -25,9 +25,10 @@ export const useTalentLearningData = () => {
       const [{ data: profileData }, { data: enrollmentsData, error: enrollmentsError }] = await Promise.all([
         (supabase as any).from("profiles").select("*").eq("id", user.id).single(),
         (supabase as any)
-          .from("course_enrollments")
-          .select("*, courses(*)")
-          .eq("user_id", user.id)
+          .schema("mvp")
+          .from("enrollments")
+          .select("*, courses:course_id(*)")
+          .eq("talent_id", user.id)
           .order("created_at", { ascending: false }),
       ]);
 
@@ -36,13 +37,19 @@ export const useTalentLearningData = () => {
       if (enrollmentsError) {
         const missingTable =
           enrollmentsError.code === "PGRST205" ||
-          String(enrollmentsError.message || "").includes("course_enrollments");
+          String(enrollmentsError.message || "").includes("enrollments");
         if (!missingTable) {
           throw enrollmentsError;
         }
         setEnrollments([]);
       } else {
-        setEnrollments((enrollmentsData as EnrollmentWithCourse[]) || []);
+        // Map mvp.enrollments progress to progress_percent for UI compatibility
+        const mappedEnrollments = (enrollmentsData as any[] || []).map(e => ({
+          ...e,
+          progress_percent: e.progress,
+          courses: e.courses || null
+        }));
+        setEnrollments(mappedEnrollments as EnrollmentWithCourse[]);
       }
     } finally {
       setLoading(false);

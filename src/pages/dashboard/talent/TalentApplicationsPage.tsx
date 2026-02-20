@@ -1,203 +1,301 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-    Briefcase,
-    CalendarDays,
-    CheckCircle2,
-    Clock,
-    MoreHorizontal,
-    Plus,
-    Search,
-    XCircle
-} from "lucide-react";
+import { ReactNode, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Briefcase, CalendarDays, CheckCircle2, Clock3, Filter, MoreHorizontal, Plus, Search, XCircle } from "lucide-react";
+import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
-// Mock Data for Premium Feel
+type ApplicationStage = "APPLIED" | "SCREENING" | "INTERVIEW" | "OFFER" | "REJECTED";
+
 type Application = {
-    id: string;
-    role: string;
-    company: string;
-    logo: string;
-    date: string;
-    stage: "APPLIED" | "SCREENING" | "INTERVIEW" | "OFFER" | "REJECTED";
-    salary: string;
-    location: string;
-    nextStep?: string;
+  id: string;
+  company: string;
+  role: string;
+  location: string;
+  stage: ApplicationStage;
+  date: string;
+  logo: string;
+  salary: string;
+  nextStep?: string;
 };
 
-const MOCK_APPLICATIONS: Application[] = [
-    {
-        id: "1",
-        role: "Senior SAP Consultant",
-        company: "TechSolutions GmbH",
-        logo: "TS",
-        date: "2 days ago",
-        stage: "INTERVIEW",
-        salary: "€65k - €80k",
-        location: "Berlin (Hybrid)",
-        nextStep: "Tech Interview on Feb 20"
-    },
-    {
-        id: "2",
-        role: "SAP FICO Analyst",
-        company: "Global Corp",
-        logo: "GC",
-        date: "1 week ago",
-        stage: "APPLIED",
-        salary: "€55k - €70k",
-        location: "Munich",
-    },
-    {
-        id: "3",
-        role: "Junior ABAP Developer",
-        company: "InnovateX",
-        logo: "IX",
-        date: "3 days ago",
-        stage: "SCREENING",
-        salary: "€45k - €55k",
-        location: "Remote",
-        nextStep: "HR Screening Call"
-    },
-    {
-        id: "4",
-        role: "SAP Project Manager",
-        company: "AutoSystems",
-        logo: "AS",
-        date: "2 weeks ago",
-        stage: "OFFER",
-        salary: "€85k+",
-        location: "Stuttgart",
-        nextStep: "Review Offer Letter"
-    },
-    {
-        id: "5",
-        role: "Integration Specialist",
-        company: "CloudNet",
-        logo: "CN",
-        date: "1 month ago",
-        stage: "REJECTED",
-        salary: "€60k",
-        location: "Hamburg",
-    }
+const COLUMNS: Array<{ id: ApplicationStage; label: string; color: string }> = [
+  { id: "APPLIED", label: "Applied", color: "from-slate-100/80 to-slate-50/20" },
+  { id: "SCREENING", label: "Screening", color: "from-primary/20 to-primary/5" },
+  { id: "INTERVIEW", label: "Interview", color: "from-secondary/20 to-secondary/5" },
+  { id: "OFFER", label: "Offer", color: "from-emerald-100/80 to-emerald-50/20" },
 ];
 
-const COLUMNS = [
-    { id: "APPLIED", label: "Applied", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
-    { id: "SCREENING", label: "Screening", color: "bg-purple-500/10 text-purple-500 border-purple-500/20" },
-    { id: "INTERVIEW", label: "Interview", color: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
-    { id: "OFFER", label: "Offer", color: "bg-green-500/10 text-green-500 border-green-500/20" },
+const MOCK_APPLICATIONS: Application[] = [
+  {
+    id: "1",
+    company: "TechCorp",
+    role: "Senior Frontend Developer",
+    location: "Remote",
+    stage: "APPLIED",
+    date: "2 days ago",
+    logo: "TC",
+    salary: "$120k - $150k",
+    nextStep: "Waiting for recruiter review",
+  },
+  {
+    id: "2",
+    company: "InnovateLabs",
+    role: "Full Stack Engineer",
+    location: "Berlin (Hybrid)",
+    stage: "SCREENING",
+    date: "1 week ago",
+    logo: "IL",
+    salary: "EUR 65k - 80k",
+    nextStep: "HR screen scheduled for Thursday",
+  },
+  {
+    id: "3",
+    company: "DataSystems",
+    role: "React Native Developer",
+    location: "London",
+    stage: "INTERVIEW",
+    date: "3 weeks ago",
+    logo: "DS",
+    salary: "GBP 60k - 75k",
+    nextStep: "Technical interview panel pending",
+  },
+  {
+    id: "4",
+    company: "ERP Core",
+    role: "SAP UI5 Engineer",
+    location: "Munich",
+    stage: "OFFER",
+    date: "4 days ago",
+    logo: "EC",
+    salary: "EUR 72k - 88k",
+    nextStep: "Offer deadline in 48h",
+  },
 ];
 
 export default function TalentApplicationsPage() {
-    const [applications, setApplications] = useState<Application[]>(MOCK_APPLICATIONS);
+  const [applications, setApplications] = useState<Application[]>(MOCK_APPLICATIONS);
+  const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+  const [search, setSearch] = useState("");
 
-    return (
-        <div className="h-[calc(100vh-100px)] flex flex-col space-y-6 animate-in fade-in duration-500">
-
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Applications</h1>
-                    <p className="text-muted-foreground mt-1">Track your job search progress in real-time.</p>
-                </div>
-                <Button className="gap-2 shadow-lg shadow-primary/20">
-                    <Plus className="w-4 h-4" /> New Application
-                </Button>
-            </div>
-
-            {/* Kanban Board */}
-            <div className="flex-1 overflow-x-auto pb-4">
-                <div className="flex gap-6 min-w-[1000px] h-full">
-                    {COLUMNS.map((column) => (
-                        <div key={column.id} className="flex-1 min-w-[300px] flex flex-col gap-4">
-                            {/* Column Header */}
-                            <div className={`p-3 rounded-xl border ${column.color} flex items-center justify-between backdrop-blur-sm`}>
-                                <span className="font-semibold text-sm uppercase tracking-wider">{column.label}</span>
-                                <span className="bg-background/50 px-2 py-0.5 rounded-md text-xs font-bold">
-                                    {applications.filter(a => a.stage === column.id).length}
-                                </span>
-                            </div>
-
-                            {/* Cards Container */}
-                            <ScrollArea className="flex-1">
-                                <div className="space-y-3 pr-4 pb-2">
-                                    {applications
-                                        .filter(app => app.stage === column.id)
-                                        .map((app) => (
-                                            <motion.div
-                                                key={app.id}
-                                                layoutId={app.id}
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                                                className="group"
-                                            >
-                                                <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/80 hover:shadow-lg transition-all duration-300">
-                                                    <CardHeader className="p-4 pb-3 space-y-2">
-                                                        <div className="flex justify-between items-start">
-                                                            <div className="flex items-center gap-3">
-                                                                <Avatar className="h-8 w-8 rounded-lg border border-border/50">
-                                                                    <AvatarImage src={`https://avatar.vercel.sh/${app.company}.png`} />
-                                                                    <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs font-bold">{app.logo}</AvatarFallback>
-                                                                </Avatar>
-                                                                <div>
-                                                                    <h3 className="font-semibold text-sm leading-none">{app.company}</h3>
-                                                                    <p className="text-xs text-muted-foreground mt-1">{app.location}</p>
-                                                                </div>
-                                                            </div>
-                                                            <DropdownMenu>
-                                                                <DropdownMenuTrigger asChild>
-                                                                    <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                        <MoreHorizontal className="h-3 w-3" />
-                                                                    </Button>
-                                                                </DropdownMenuTrigger>
-                                                                <DropdownMenuContent align="end">
-                                                                    <DropdownMenuItem>View Details</DropdownMenuItem>
-                                                                    <DropdownMenuItem>Move to...</DropdownMenuItem>
-                                                                    <DropdownMenuItem className="text-red-500">Archive</DropdownMenuItem>
-                                                                </DropdownMenuContent>
-                                                            </DropdownMenu>
-                                                        </div>
-                                                        <h4 className="font-bold text-base line-clamp-1 group-hover:text-primary transition-colors">{app.role}</h4>
-                                                    </CardHeader>
-                                                    <CardContent className="p-4 pt-0 pb-3">
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-                                                            <Briefcase className="h-3 w-3" /> {app.salary}
-                                                        </div>
-                                                        {app.nextStep && (
-                                                            <div className="bg-primary/5 border border-primary/10 rounded-lg p-2 flex items-start gap-2">
-                                                                <Clock className="h-3 w-3 text-primary mt-0.5 shrink-0" />
-                                                                <p className="text-[10px] font-medium leading-tight text-primary/80">{app.nextStep}</p>
-                                                            </div>
-                                                        )}
-                                                    </CardContent>
-                                                    <CardFooter className="p-3 pt-0 flex justify-between items-center text-[10px] text-muted-foreground border-t border-border/30 mt-2 bg-muted/20 rounded-b-xl group-hover:bg-muted/30 transition-colors">
-                                                        <span>Updated {app.date}</span>
-                                                        <Button variant="ghost" size="sm" className="h-6 text-[10px] hover:text-primary px-2">
-                                                            View
-                                                        </Button>
-                                                    </CardFooter>
-                                                </Card>
-                                            </motion.div>
-                                        ))}
-                                </div>
-                            </ScrollArea>
-
-                            {/* Empty State for Column */}
-                            {applications.filter(a => a.stage === column.id).length === 0 && (
-                                <div className="h-24 rounded-xl border border-dashed border-border/50 flex items-center justify-center text-muted-foreground/40 text-xs uppercase tracking-wide">
-                                    No Applications
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
+  const filteredApplications = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return applications;
+    return applications.filter((application) =>
+      [application.company, application.role, application.location, application.stage].join(" ").toLowerCase().includes(query),
     );
+  }, [applications, search]);
+
+  const stats = useMemo(() => {
+    const interviews = applications.filter((item) => item.stage === "INTERVIEW").length;
+    const offers = applications.filter((item) => item.stage === "OFFER").length;
+    const rejected = applications.filter((item) => item.stage === "REJECTED").length;
+    return {
+      total: applications.length,
+      interviews,
+      offers,
+      rejected,
+    };
+  }, [applications]);
+
+  const handleArchive = (id: string) => {
+    setApplications((prev) => prev.filter((item) => item.id !== id));
+    if (selectedApp?.id === id) setSelectedApp(null);
+    toast.success("Application archived");
+  };
+
+  const handleStatusChange = (id: string, next: ApplicationStage) => {
+    setApplications((prev) => prev.map((item) => (item.id === id ? { ...item, stage: next } : item)));
+    toast.success(`Application moved to ${next}`);
+  };
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <section className="rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/10 p-5 md:p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <Badge variant="secondary" className="mb-2 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]">
+              <Briefcase className="mr-1 h-3.5 w-3.5" /> Career Pipeline
+            </Badge>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Application tracker</h1>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Track every role, next step, and interview milestone in one visual board.</p>
+          </div>
+          <Button className="gap-2" onClick={() => toast.success("Starting new application wizard...")}> 
+            <Plus className="h-4 w-4" /> New application
+          </Button>
+        </div>
+      </section>
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Metric label="Total" value={`${stats.total}`} icon={<Briefcase className="h-4 w-4 text-primary" />} />
+        <Metric label="Interviews" value={`${stats.interviews}`} icon={<CalendarDays className="h-4 w-4 text-primary" />} />
+        <Metric label="Offers" value={`${stats.offers}`} icon={<CheckCircle2 className="h-4 w-4 text-primary" />} />
+        <Metric label="Closed" value={`${stats.rejected}`} icon={<XCircle className="h-4 w-4 text-primary" />} />
+      </section>
+
+      <Card className="border-border/60">
+        <CardHeader className="pb-3">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <CardTitle className="text-base">Pipeline board</CardTitle>
+              <CardDescription>Filter and monitor progress by stage.</CardDescription>
+            </div>
+            <div className="flex w-full items-center gap-2 md:w-auto">
+              <div className="relative w-full md:w-72">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search company, role, location..." className="pl-9" />
+              </div>
+              <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto pb-2">
+            <div className="flex min-w-[1100px] gap-4">
+              {COLUMNS.map((column) => {
+                const columnApps = filteredApplications.filter((application) => application.stage === column.id);
+
+                return (
+                  <div key={column.id} className="w-[280px] shrink-0">
+                    <div className={`mb-3 rounded-xl border border-border/60 bg-gradient-to-br px-3 py-2 ${column.color}`}>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-foreground">{column.label}</p>
+                        <Badge variant="secondary">{columnApps.length}</Badge>
+                      </div>
+                    </div>
+
+                    <ScrollArea className="h-[520px] pr-2">
+                      <div className="space-y-3">
+                        {columnApps.map((application) => (
+                          <motion.div key={application.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                            <Card className="group border-border/60 bg-card/80 transition hover:border-primary/40 hover:shadow-lg">
+                              <CardHeader className="space-y-2 p-3 pb-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2.5">
+                                    <Avatar className="h-8 w-8 rounded-lg border border-border/60">
+                                      <AvatarImage src={`https://avatar.vercel.sh/${application.company}.png`} />
+                                      <AvatarFallback className="rounded-lg bg-primary/10 text-[11px] font-bold text-primary">{application.logo}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="text-sm font-semibold text-foreground">{application.company}</p>
+                                      <p className="text-[11px] text-muted-foreground">{application.location}</p>
+                                    </div>
+                                  </div>
+
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100">
+                                        <MoreHorizontal className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem onClick={() => setSelectedApp(application)}>View details</DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleStatusChange(application.id, "INTERVIEW")}>Move to interview</DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleStatusChange(application.id, "OFFER")}>Move to offer</DropdownMenuItem>
+                                      <DropdownMenuItem className="text-destructive" onClick={() => handleArchive(application.id)}>Archive</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+
+                                <p className="line-clamp-1 text-sm font-bold text-foreground">{application.role}</p>
+                              </CardHeader>
+
+                              <CardContent className="p-3 pt-1">
+                                <p className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                  <Briefcase className="h-3.5 w-3.5" /> {application.salary}
+                                </p>
+                                {application.nextStep ? (
+                                  <div className="mt-2 rounded-lg border border-primary/20 bg-primary/5 p-2">
+                                    <p className="inline-flex items-center gap-1 text-[11px] text-primary/90">
+                                      <Clock3 className="h-3.5 w-3.5" /> {application.nextStep}
+                                    </p>
+                                  </div>
+                                ) : null}
+                              </CardContent>
+
+                              <CardFooter className="flex items-center justify-between border-t border-border/50 bg-muted/20 px-3 py-2 text-[11px] text-muted-foreground">
+                                <span>Updated {application.date}</span>
+                                <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px]" onClick={() => setSelectedApp(application)}>View</Button>
+                              </CardFooter>
+                            </Card>
+                          </motion.div>
+                        ))}
+
+                        {columnApps.length === 0 ? (
+                          <div className="rounded-xl border border-dashed border-border/70 p-6 text-center text-[11px] uppercase tracking-wide text-muted-foreground">
+                            No applications
+                          </div>
+                        ) : null}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Sheet open={Boolean(selectedApp)} onOpenChange={() => setSelectedApp(null)}>
+        <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+          {selectedApp ? (
+            <div className="space-y-5">
+              <SheetHeader>
+                <SheetTitle className="text-2xl">{selectedApp.role}</SheetTitle>
+                <SheetDescription>{selectedApp.company} - {selectedApp.location}</SheetDescription>
+              </SheetHeader>
+
+              <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Current stage</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{selectedApp.stage}</p>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-foreground">Timeline</h4>
+                {COLUMNS.map((column, index) => {
+                  const current = COLUMNS.findIndex((item) => item.id === selectedApp.stage);
+                  const reached = current >= index;
+                  return (
+                    <div key={column.id} className="flex items-center gap-2 text-sm">
+                      <span className={`h-2.5 w-2.5 rounded-full ${reached ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                      <span className={reached ? "text-foreground" : "text-muted-foreground"}>{column.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+                <p className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+                  <CalendarDays className="h-4 w-4" /> Next step
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{selectedApp.nextStep || "Waiting for employer response"}</p>
+              </div>
+
+              <Button variant="destructive" className="w-full" onClick={() => handleArchive(selectedApp.id)}>Withdraw application</Button>
+            </div>
+          ) : null}
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
+
+function Metric({ label, value, icon }: { label: string; value: string; icon: ReactNode }) {
+  return (
+    <Card className="border-border/60">
+      <CardContent className="flex items-center justify-between p-4">
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+          <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">{value}</p>
+        </div>
+        <div className="rounded-xl border border-primary/20 bg-primary/10 p-2.5">{icon}</div>
+      </CardContent>
+    </Card>
+  );
 }

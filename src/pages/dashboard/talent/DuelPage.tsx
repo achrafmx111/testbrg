@@ -140,8 +140,8 @@ export default function DuelPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8 animate-in fade-in">
                 <div className="relative">
-                    <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 rounded-full animate-pulse" />
-                    <Loader2 className="h-16 w-16 text-indigo-600 animate-spin relative z-10" />
+                    <div className="absolute inset-0 bg-primary blur-xl opacity-20 rounded-full animate-pulse" />
+                    <Loader2 className="h-16 w-16 text-primary animate-spin relative z-10" />
                 </div>
                 <div className="text-center space-y-2">
                     <h2 className="text-2xl font-bold">Finding Opponent...</h2>
@@ -163,24 +163,24 @@ export default function DuelPage() {
     if (gameState === "ready") {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8 animate-in zoom-in duration-300">
-                <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500 uppercase tracking-widest">
+                <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary uppercase tracking-widest">
                     VS
                 </h1>
                 <div className="flex items-center justify-center gap-12">
                     <div className="text-center space-y-2">
-                        <Avatar className="h-24 w-24 border-4 border-indigo-500 shadow-xl">
+                        <Avatar className="h-24 w-24 border-4 border-primary shadow-xl">
                             <AvatarFallback>You</AvatarFallback>
                         </Avatar>
                         <p className="font-bold text-lg">You</p>
                     </div>
                     <div className="text-center space-y-2">
-                        <Avatar className="h-24 w-24 border-4 border-red-500 shadow-xl">
+                        <Avatar className="h-24 w-24 border-4 border-secondary shadow-xl">
                             <AvatarFallback>{opponent?.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <p className="font-bold text-lg">{opponent?.name}</p>
                     </div>
                 </div>
-                <p className="text-2xl font-medium animate-pulse text-indigo-600">Get Ready!</p>
+                <p className="text-2xl font-medium animate-pulse text-primary">Get Ready!</p>
             </div>
         );
     }
@@ -200,12 +200,12 @@ export default function DuelPage() {
                 </div>
 
                 <div className="flex gap-12 text-4xl font-mono font-bold items-center py-4">
-                    <div className="text-indigo-600 flex flex-col items-center">
+                    <div className="text-primary flex flex-col items-center">
                         <span>{userScore}</span>
                         <span className="text-xs text-muted-foreground font-sans font-normal">You</span>
                     </div>
                     <div className="text-slate-300">-</div>
-                    <div className="text-red-500 flex flex-col items-center">
+                    <div className="text-secondary flex flex-col items-center">
                         <span>{opponent?.score}</span>
                         <span className="text-xs text-muted-foreground font-sans font-normal">{opponent?.name}</span>
                     </div>
@@ -215,7 +215,7 @@ export default function DuelPage() {
                     <Button variant="outline" onClick={() => window.location.reload()} className="w-32">
                         Rematch
                     </Button>
-                    <Button asChild className="w-32 bg-indigo-600 hover:bg-indigo-700">
+                    <Button asChild className="w-32">
                         <Link to="/talent/community">Back to Hub</Link>
                     </Button>
                 </div>
@@ -232,12 +232,12 @@ export default function DuelPage() {
             {/* Header: Scores & Timer */}
             <div className="flex items-center justify-between bg-white/50 backdrop-blur-sm p-4 rounded-2xl border shadow-sm">
                 <div className="flex items-center gap-4">
-                    <Avatar className="h-12 w-12 border-2 border-indigo-500">
+                    <Avatar className="h-12 w-12 border-2 border-primary">
                         <AvatarFallback>You</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
                         <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">You</span>
-                        <span className="font-bold text-2xl text-indigo-700">{userScore}</span>
+                        <span className="font-bold text-2xl text-primary">{userScore}</span>
                     </div>
                 </div>
 
@@ -251,9 +251,9 @@ export default function DuelPage() {
                 <div className="flex items-center gap-4 text-right">
                     <div className="flex flex-col">
                         <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">{opponent?.name}</span>
-                        <span className="font-bold text-2xl text-red-500">{opponent?.score}</span>
+                        <span className="font-bold text-2xl text-secondary">{opponent?.score}</span>
                     </div>
-                    <Avatar className="h-12 w-12 border-2 border-red-500">
+                    <Avatar className="h-12 w-12 border-2 border-secondary">
                         <AvatarFallback>{opponent?.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                 </div>
@@ -261,10 +261,10 @@ export default function DuelPage() {
 
             {/* Question Card */}
             <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-md overflow-hidden relative">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-accent" />
                 <CardContent className="p-8 md:p-12 text-center space-y-12">
                     <div className="space-y-4">
-                        <span className="text-xs font-bold tracking-widest text-indigo-500 uppercase border border-indigo-200 px-3 py-1 rounded-full bg-indigo-50">
+                        <span className="text-xs font-bold tracking-widest text-primary uppercase border border-primary/20 px-3 py-1 rounded-full bg-primary/5">
                             Question {currentQuestionIndex + 1} / {roundQuestions.length}
                         </span>
                         <h2 className="text-3xl md:text-4xl font-bold text-slate-800 leading-tight">{currentQ.question}</h2>
@@ -273,7 +273,7 @@ export default function DuelPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         {currentQ.options.map((option, idx) => {
                             const isTheCorrectAnswer = idx === currentQ.correct;
-                            let buttonStyle = "h-20 text-xl border-2 hover:border-indigo-500 hover:bg-indigo-50 transition-all shadow-sm active:scale-95";
+                            let buttonStyle = "h-20 text-xl border-2 hover:border-primary hover:bg-primary/5 transition-all shadow-sm active:scale-95";
 
                             if (isAnswered) {
                                 if (isTheCorrectAnswer) buttonStyle = "h-20 text-xl bg-green-100 border-green-500 text-green-800 pointer-events-none shadow-md ring-2 ring-green-200";

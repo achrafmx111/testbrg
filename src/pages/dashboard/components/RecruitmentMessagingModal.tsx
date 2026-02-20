@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import { mvpSchema } from "@/integrations/supabase/mvp";
 import { useToast } from "@/hooks/use-toast";
 import { RecruitmentMessage } from "@/types";
 import { Loader2, Send } from "lucide-react";
@@ -43,7 +44,7 @@ export const RecruitmentMessagingModal = ({
         if (!applicationId) return;
         setLoading(true);
         try {
-            const { data, error } = await (supabase as any)
+            const { data, error } = await mvpSchema
                 .from("recruitment_messages")
                 .select("*")
                 .eq("application_id", applicationId)
@@ -94,7 +95,7 @@ export const RecruitmentMessagingModal = ({
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Not authenticated");
 
-            const { error } = await (supabase as any)
+            const { error } = await mvpSchema
                 .from("recruitment_messages")
                 .insert({
                     employer_id: user.id,
@@ -131,12 +132,12 @@ export const RecruitmentMessagingModal = ({
         if (!applicationId) return;
 
         const channel = supabase
-            .channel(`public:recruitment_messages:${applicationId}`)
+            .channel(`mvp:recruitment_messages:${applicationId}`)
             .on(
                 'postgres_changes',
                 {
                     event: 'INSERT',
-                    schema: 'public',
+                    schema: 'mvp',
                     table: 'recruitment_messages',
                     filter: `application_id=eq.${applicationId}`
                 },

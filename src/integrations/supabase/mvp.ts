@@ -37,6 +37,11 @@ export interface MvpCompany {
   name: string;
   industry: string | null;
   country: string | null;
+  website?: string | null;
+  size?: string | null;
+  description?: string | null;
+  location?: string | null;
+  logo_url?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -61,6 +66,11 @@ export interface MvpApplication {
   talent_id: string;
   stage: ApplicationStage;
   score: number | null;
+  admin_rating?: number | null;
+  admin_notes?: string | null;
+  status_message?: string | null;
+  missing_docs?: string[] | null;
+  next_steps?: { text: string; link: string } | null;
   created_at: string;
   updated_at: string;
 }
@@ -96,6 +106,24 @@ export interface MvpInterview {
   created_at: string;
 }
 
+export interface MvpInterviewRequest {
+  id: string;
+  company_id: string | null;
+  talent_id: string;
+  application_id: string | null;
+  recruiter_id: string | null;
+  status: "pending" | "approved" | "rejected" | "scheduled" | "completed";
+  message: string | null;
+  proposed_times: any[];
+  confirmed_time: string | null;
+  meeting_link: string | null;
+  created_at: string;
+  updated_at: string;
+  company?: { id: string, name: string, logo_url: string | null };
+  talent?: { id: string, full_name: string | null, email: string | null };
+  application?: { id: string, talent_id: string, job?: { id: string, title: string } };
+}
+
 export interface MvpMessage {
   id: string;
   from_user_id: string;
@@ -116,6 +144,15 @@ export interface MvpRegistrationRequest {
   country?: string;
   website?: string;
   status: string;
+  created_at: string;
+}
+
+export interface MvpEmployerFavorite {
+  id: string;
+  employer_id: string;
+  talent_id: string;
+  notes: string | null;
+  pipeline_status: string | null;
   created_at: string;
 }
 
@@ -212,7 +249,7 @@ export interface MvpTeamMember {
   }
 }
 
-const mvpSchema: any = (supabase as any).schema("mvp");
+export const mvpSchema: any = (supabase as any).schema("mvp");
 
 function mapArray<T>(value: unknown): T[] {
   if (Array.isArray(value)) {
@@ -256,6 +293,11 @@ function mapCompany(row: any): MvpCompany {
     name: row.name,
     industry: row.industry,
     country: row.country,
+    website: row.website,
+    size: row.size,
+    description: row.description,
+    location: row.location,
+    logo_url: row.logo_url,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -471,6 +513,12 @@ export const mvp = {
     return (data ?? []).map(mapTalentProfile);
   },
 
+  async getTalentProfile(userId: string): Promise<MvpTalentProfile | null> {
+    const { data, error } = await mvpSchema.from("talent_profiles").select("*").eq("user_id", userId).maybeSingle();
+    if (error) throw error;
+    return data ? mapTalentProfile(data) : null;
+  },
+
   async upsertTalentProfile(input: {
     user_id: string;
     bio?: string;
@@ -512,10 +560,28 @@ export const mvp = {
     return mapTalentProfile(data);
   },
 
-  async createCompany(input: { name: string; industry?: string; country?: string }): Promise<MvpCompany> {
+  async createCompany(input: {
+    name: string;
+    industry?: string;
+    country?: string;
+    website?: string;
+    size?: string;
+    description?: string;
+    location?: string;
+    logo_url?: string;
+  }): Promise<MvpCompany> {
     const { data, error } = await mvpSchema
       .from("companies")
-      .insert({ name: input.name, industry: input.industry ?? null, country: input.country ?? null })
+      .insert({
+        name: input.name,
+        industry: input.industry ?? null,
+        country: input.country ?? null,
+        website: input.website ?? null,
+        size: input.size ?? null,
+        description: input.description ?? null,
+        location: input.location ?? null,
+        logo_url: input.logo_url ?? null,
+      })
       .select("*")
       .single();
     if (error) throw error;
@@ -580,7 +646,16 @@ export const mvp = {
     if (error) throw error;
   },
 
-  async updateCompany(id: string, input: { name?: string; industry?: string | null; country?: string | null }): Promise<MvpCompany> {
+  async updateCompany(id: string, input: {
+    name?: string;
+    industry?: string | null;
+    country?: string | null;
+    website?: string | null;
+    size?: string | null;
+    description?: string | null;
+    location?: string | null;
+    logo_url?: string | null;
+  }): Promise<MvpCompany> {
     const { data, error } = await mvpSchema
       .from("companies")
       .update(input)
@@ -671,15 +746,6 @@ export const mvp = {
       .single();
     if (error) throw error;
     return mapApplication(data);
-  },
-
-  async listApplications(): Promise<MvpApplication[]> {
-    const { data, error } = await mvpSchema
-      .from("applications")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return (data ?? []).map(mapApplication);
   },
 
   async listTalentApplications(talentId: string): Promise<MvpApplication[]> {
@@ -897,8 +963,11 @@ export const mvp = {
   // Lessons
   async listLessons(courseId: string): Promise<MvpLesson[]> {
     const { data, error } = await mvpSchema.from("lessons").select("*").eq("course_id", courseId).order("order", { ascending: true });
-    if (error) throw error;
-    return data;
+    if (error) {
+      if (error.code === "PGRST204" || error.code === "PGRST205" || String(error.message).includes("lessons")) return [];
+      throw error;
+    }
+    return data || [];
   },
   async createLesson(lesson: Partial<MvpLesson>) {
     const { data, error } = await mvpSchema.from("lessons").insert(lesson).select().single();
@@ -922,7 +991,10 @@ export const mvp = {
       query = query.eq("course_id", courseId);
     }
     const { data, error } = await query;
-    if (error) throw error;
+    if (error) {
+      if (error.code === "PGRST204" || error.code === "PGRST205" || String(error.message).includes("assessments")) return [];
+      throw error;
+    }
     return (data ?? []).map(mapAssessment);
   },
 
@@ -945,7 +1017,10 @@ export const mvp = {
       query = query.eq("talent_id", talentId);
     }
     const { data, error } = await query;
-    if (error) throw error;
+    if (error) {
+      if (error.code === "PGRST204" || error.code === "PGRST205" || String(error.message).includes("submissions")) return [];
+      throw error;
+    }
     return (data ?? []).map(mapSubmission);
   },
 
@@ -953,6 +1028,22 @@ export const mvp = {
     const { data, error } = await mvpSchema.from("submissions").insert(submission).select().single();
     if (error) throw error;
     return mapSubmission(data);
+  },
+  async listApplications(): Promise<MvpApplication[]> {
+    const { data, error } = await mvpSchema
+      .from("applications")
+      .select(`
+        *,
+        job:jobs(id, title),
+        talent:profiles!talent_id(id, full_name, email)
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      if (error.code === "PGRST204" || error.code === "PGRST205" || String(error.message).includes("applications")) return [];
+      throw error;
+    }
+    return data || [];
   },
 
   // Invoices
@@ -1001,6 +1092,132 @@ export const mvp = {
     if (error) throw error;
     return (data ?? []).map(mapRolePermission);
   },
+
+  async listInterviewRequests(): Promise<MvpInterviewRequest[]> {
+    const { data, error } = await mvpSchema
+      .from("interview_requests")
+      .select(`
+        *,
+        company:companies(id, name, logo_url),
+        talent:profiles!talent_id(id, full_name, email),
+        application:applications(id, talent_id, job:jobs(id, title))
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      if (error.code === "PGRST204" || error.code === "PGRST205" || String(error.message).includes("interview_requests")) return [];
+      throw error;
+    }
+    return data || [];
+  },
+
+  async updateInterviewStatus(id: string, status: string): Promise<void> {
+    const { error } = await mvpSchema.from("interview_requests").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
+    if (error) throw error;
+  },
+
+  async updateRegistrationRequest(id: string, updates: Partial<MvpRegistrationRequest>): Promise<void> {
+    const { error } = await mvpSchema.from("company_registration_requests").update({ ...updates, updated_at: new Date().toISOString() }).eq("id", id);
+    if (error) throw error;
+  },
+
+  async updateApplication(id: string, updates: Partial<MvpApplication>): Promise<void> {
+    const { error } = await mvpSchema.from("applications").update({ ...updates, updated_at: new Date().toISOString() }).eq("id", id);
+    if (error) throw error;
+  },
+
+  async bulkUpdateApplications(ids: string[], updates: Partial<MvpApplication>): Promise<void> {
+    const { error } = await mvpSchema.from("applications").update({ ...updates, updated_at: new Date().toISOString() }).in("id", ids);
+    if (error) throw error;
+  },
+
+  async listRecruitmentMessages(status?: string): Promise<any[]> {
+    let query = mvpSchema
+      .from("recruitment_messages")
+      .select("*, application:applications(name, email), employer:profiles!employer_id(email)")
+      .order("created_at", { ascending: false });
+
+    if (status) {
+      query = query.eq("status", status);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      if (error.code === "PGRST204" || error.code === "PGRST205" || String(error.message).includes("recruitment_messages")) return [];
+      throw error;
+    }
+    return data || [];
+  },
+
+  async updateRecruitmentMessage(id: string, updates: any): Promise<void> {
+    const { error } = await mvpSchema.from("recruitment_messages").update(updates).eq("id", id);
+    if (error) throw error;
+  },
+
+  async createActivityLog(log: any): Promise<void> {
+    const { error } = await mvpSchema.from("application_activity_logs").insert(log);
+    if (error) throw error;
+  },
+
+  // Employer Favorites
+  async listFavorites(employerId: string): Promise<MvpEmployerFavorite[]> {
+    const { data, error } = await mvpSchema
+      .from("employer_favorites")
+      .select("*")
+      .eq("employer_id", employerId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      if (error.code === "PGRST204" || error.code === "PGRST205" || String(error.message).includes("employer_favorites")) return [];
+      throw error;
+    }
+    return data || [];
+  },
+
+  async toggleFavorite(employerId: string, talentId: string): Promise<boolean> {
+    // Check if exists
+    const { data: existing } = await mvpSchema
+      .from("employer_favorites")
+      .select("id")
+      .eq("employer_id", employerId)
+      .eq("talent_id", talentId)
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await mvpSchema
+        .from("employer_favorites")
+        .delete()
+        .eq("id", existing.id);
+      if (error) throw error;
+      return false; // Not a favorite anymore
+    } else {
+      const { error } = await mvpSchema
+        .from("employer_favorites")
+        .insert({
+          employer_id: employerId,
+          talent_id: talentId,
+          pipeline_status: "shortlisted"
+        });
+      if (error) throw error;
+      return true; // Now a favorite
+    }
+  },
+
+  async updateFavoriteNote(id: string, notes: string): Promise<void> {
+    const { error } = await mvpSchema
+      .from("employer_favorites")
+      .update({ notes, updated_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) throw error;
+  },
+
+  async updateFavoriteStatus(id: string, status: string): Promise<void> {
+    const { error } = await mvpSchema
+      .from("employer_favorites")
+      .update({ pipeline_status: status, updated_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) throw error;
+  }
 };
 
 export function roleHomePath(role: MvpRole): string {

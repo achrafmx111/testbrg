@@ -37,10 +37,17 @@ export default function TalentAssessmentsPage() {
       setEnrollments(talentEnrollments);
       setSubmissions(talentSubmissions);
       setAssessments(allAssessments.filter((assessment) => enrolledCourseIds.has(assessment.course_id)));
+    } catch (error: any) {
+      console.error("Error loading assessments data:", error);
+      toast({
+        variant: "destructive",
+        title: "Error loading data",
+        description: "Failed to load assessments. The service might be temporarily unavailable.",
+      });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     load();

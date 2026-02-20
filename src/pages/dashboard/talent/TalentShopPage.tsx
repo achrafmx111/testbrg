@@ -19,8 +19,8 @@ const SHOP_ITEMS = [
         price: 5000,
         category: "boost",
         icon: Crown,
-        color: "text-indigo-500",
-        bg: "bg-indigo-500/10",
+        color: "text-primary",
+        bg: "bg-primary/10",
         popular: true
     },
     {
@@ -30,8 +30,8 @@ const SHOP_ITEMS = [
         price: 2000,
         category: "resource",
         icon: FileText,
-        color: "text-blue-500",
-        bg: "bg-blue-500/10"
+        color: "text-secondary",
+        bg: "bg-secondary/10"
     },
     {
         id: "premium-month",
@@ -40,8 +40,8 @@ const SHOP_ITEMS = [
         price: 10000,
         category: "upgrade",
         icon: Sparkles,
-        color: "text-amber-500",
-        bg: "bg-amber-500/10"
+        color: "text-accent",
+        bg: "bg-accent/10"
     },
     {
         id: "boost-24h",
@@ -50,8 +50,8 @@ const SHOP_ITEMS = [
         price: 500,
         category: "boost",
         icon: Zap,
-        color: "text-yellow-500",
-        bg: "bg-yellow-500/10"
+        color: "text-secondary",
+        bg: "bg-secondary/10"
     },
     {
         id: "theme-dark-noir",
@@ -60,8 +60,8 @@ const SHOP_ITEMS = [
         price: 1200,
         category: "cosmetic",
         icon: Palette,
-        color: "text-purple-500",
-        bg: "bg-purple-500/10"
+        color: "text-primary",
+        bg: "bg-primary/10"
     }
 ];
 
@@ -110,17 +110,17 @@ export default function TalentShopPage() {
                     <p className="text-muted-foreground mt-1">Spend your hard-earned XP on boosts and exclusive items.</p>
                 </div>
 
-                <Card className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-none shadow-lg min-w-[200px]">
+                <Card className="bg-gradient-to-r from-primary to-secondary text-primary-foreground border-none shadow-lg min-w-[200px]">
                     <CardContent className="p-4 flex items-center justify-between gap-4">
                         <div>
-                            <p className="text-indigo-100 text-xs font-medium uppercase tracking-wider">Your Balance</p>
+                            <p className="text-primary-foreground/80 text-xs font-medium uppercase tracking-wider">Your Balance</p>
                             <div className="flex items-center gap-1">
                                 <span className="text-2xl font-bold">{balance.toLocaleString()}</span>
                                 <span className="text-sm font-medium opacity-80">XP</span>
                             </div>
                         </div>
                         <div className="h-10 w-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                            <Sparkles className="h-5 w-5 text-yellow-300" />
+                            <Sparkles className="h-5 w-5 text-primary-foreground" />
                         </div>
                     </CardContent>
                 </Card>
@@ -168,7 +168,7 @@ export default function TalentShopPage() {
                                                 </CardDescription>
                                             </CardContent>
                                             <CardFooter className="pt-0 flex items-center justify-between border-t p-6 bg-muted/5">
-                                                <div className="font-bold text-slate-700">
+                                                <div className="font-bold text-foreground">
                                                     {item.price} <span className="text-xs font-normal text-muted-foreground">XP</span>
                                                 </div>
                                                 <Button

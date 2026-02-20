@@ -1,3 +1,4 @@
+
 import { ReactElement, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -98,22 +99,19 @@ const TalentProfilePage = TalentMvpProfilePage;
 const TalentJobsPage = lazy(() => import("./pages/dashboard/talent/TalentJobsPage"));
 const TalentApplicationsPage = lazy(() => import("./pages/dashboard/talent/TalentApplicationsPage"));
 const TalentCoachingPage = lazy(() => import("./pages/dashboard/talent/TalentCoachingPage"));
-// ... existing imports ...
 const TalentCoachPage = lazy(() => import("@/pages/dashboard/talent/TalentCoachPage"));
 const LinkedInOptimizerPage = lazy(() => import("./pages/dashboard/talent/LinkedInOptimizerPage"));
 const LeaderboardPage = lazy(() => import("./pages/dashboard/talent/LeaderboardPage"));
 const DuelPage = lazy(() => import("./pages/dashboard/talent/DuelPage"));
-// TalentShopPage removed (duplicate)
-// ... existing imports ...
 const ResumeAnalysisPage = lazy(() => import("@/pages/dashboard/talent/ResumeAnalysisPage"));
 const TalentRoadmapPage = lazy(() => import("./pages/dashboard/talent/TalentRoadmapPage"));
 const TalentMessagesPage = lazy(() => import("./pages/dashboard/talent/TalentMessagesPage"));
 const TalentAlumniPage = lazy(() => import("./pages/dashboard/talent/TalentAlumniPage"));
 const TalentCourseDetailsPage = lazy(() => import("./pages/dashboard/talent/TalentCourseDetailsPage"));
+const ResumeBuilderPage = lazy(() => import("./pages/dashboard/talent/resume-builder/ResumeBuilderPage"));
 
 // Company Pages
 const CompanyLayout = lazy(() => import("@/pages/dashboard/company/CompanyLayout"));
-// CompanyHomePage removed (duplicate)
 const CompanyTalentPoolPage = lazy(() => import("@/pages/dashboard/company/CompanyTalentPoolPage"));
 const CompanyApplicantsPage = lazy(() => import("./pages/dashboard/company/CompanyApplicantsPage"));
 const CompanyOffersPage = lazy(() => import("./pages/dashboard/company/CompanyOffersPage"));
@@ -121,8 +119,8 @@ const CompanyBillingPage = lazy(() => import("./pages/dashboard/company/CompanyB
 const CompanyMessagesPage = lazy(() => import("./pages/dashboard/company/CompanyMessagesPage"));
 const CompanyProfilePage = lazy(() => import("./pages/dashboard/company/CompanyProfilePage"));
 const CompanyJobsPage = lazy(() => import("./pages/dashboard/company/CompanyJobsPage"));
-const CompanyPipelinePage = lazy(() => import("./pages/dashboard/company/CompanyPipelinePage"));
 const CompanyAnalyticsPage = lazy(() => import("./pages/dashboard/company/CompanyAnalyticsPage"));
+const CompanyInterviewsPage = lazy(() => import("./pages/dashboard/company/CompanyInterviewsPage"));
 
 // External/Other
 const ExternalTalentDashboard = lazy(() => import("./pages/dashboard/ExternalTalentDashboard"));
@@ -256,6 +254,7 @@ const App = () => (
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="duel" element={<DuelPage />} />
               <Route path="resume-analysis" element={<ResumeAnalysisPage />} />
+              <Route path="resume-builder" element={<ResumeBuilderPage />} />
               <Route path="roadmap" element={<TalentRoadmapPage />} />
               <Route path="messages" element={<TalentMessagesPage />} />
               <Route path="alumni" element={<TalentAlumniPage />} />
@@ -276,8 +275,9 @@ const App = () => (
               <Route index element={<CompanyHomePage />} />
               <Route path="profile" element={<CompanyProfilePage />} />
               <Route path="jobs" element={<CompanyJobsPage />} />
-              <Route path="pipeline" element={<CompanyPipelinePage />} />
+              <Route path="pipeline" element={<CompanyApplicantsPage />} />
               <Route path="analytics" element={<CompanyAnalyticsPage />} />
+              <Route path="interviews" element={<CompanyInterviewsPage />} />
               <Route path="talent-pool" element={<CompanyTalentPoolPage />} />
               <Route path="applicants" element={<CompanyApplicantsPage />} />
               <Route path="offers" element={<CompanyOffersPage />} />

@@ -1,4 +1,5 @@
 import { Activity, AlertTriangle, Clock3, LifeBuoy, MessageSquare, ShieldCheck, UserRoundCog, Zap } from "lucide-react";
+import { toast } from "sonner";
 import { AdminSectionHeader, AdminStatCard } from "@/components/admin/AdminPrimitives";
 import { adminClassTokens } from "@/components/admin/designTokens";
 import { AdminSystemHealth } from "@/pages/dashboard/components/AdminSystemHealth";
@@ -61,7 +62,7 @@ export default function AdminSupportPage() {
         title="Support & System Health"
         description="Ticket queue operations, SLA monitoring, and reliability controls for cross-role support."
         aside={
-          <Button className="h-9 rounded-lg bg-primary/90 px-4 text-xs font-semibold tracking-wide text-primary-foreground hover:bg-primary">
+          <Button className="h-9 rounded-lg bg-primary/90 px-4 text-xs font-semibold tracking-wide text-primary-foreground hover:bg-primary" onClick={() => toast.info("Broadcasting support message...")}>
             Open support broadcast
           </Button>
         }

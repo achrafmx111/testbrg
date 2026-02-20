@@ -292,7 +292,7 @@ export default function TalentCoachPage() {
                 <CardHeader className="py-4 px-6 border-b flex flex-row items-center justify-between space-y-0">
                     <div className="flex items-center gap-3">
                         <Avatar className={`h-10 w-10 border-2 ${voice.isSpeaking ? 'border-primary shadow-[0_0_15px_rgba(var(--primary),0.5)] transition-all duration-300' : 'border-primary/20'}`}>
-                            <AvatarImage src="/placeholder-avatar.jpg" />
+                            <AvatarImage src="https://i.pravatar.cc/120?u=ai-coach-sarah" />
                             <AvatarFallback className="bg-primary/10 text-primary font-bold">AI</AvatarFallback>
                         </Avatar>
                         <div>

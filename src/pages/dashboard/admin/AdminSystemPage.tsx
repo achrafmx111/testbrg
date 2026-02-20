@@ -1,106 +1,165 @@
-import { useEffect, useState } from "react";
-import { Server, Shield, Database, Activity, AlertOctagon } from "lucide-react";
-import { AdminSectionHeader, AdminStatCard, AdminPanelHeader } from "@/components/admin/AdminPrimitives";
+import { ReactNode, useMemo, useState } from "react";
+import { Activity, AlertOctagon, Cpu, Database, Globe, HardDrive, Lock, RefreshCcw, Server, Shield } from "lucide-react";
+import { AdminSectionHeader, AdminStatCard } from "@/components/admin/AdminPrimitives";
 import { adminClassTokens } from "@/components/admin/designTokens";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+
+const INCIDENT_FEED: Array<{ id: string; title: string; severity: "low" | "medium" | "resolved"; time: string }> = [
+  { id: "INC-441", title: "Queue spike detected on messaging workers", severity: "medium", time: "6m ago" },
+  { id: "INC-439", title: "API latency threshold crossed in eu-central", severity: "low", time: "18m ago" },
+  { id: "INC-434", title: "Temporary auth provider timeout", severity: "resolved", time: "53m ago" },
+];
+
+const SERVICE_PANELS = [
+  { name: "API Gateway", uptime: 99.97, latency: "38ms", load: 64 },
+  { name: "Database Cluster", uptime: 99.99, latency: "21ms", load: 58 },
+  { name: "Realtime Sync", uptime: 99.91, latency: "44ms", load: 71 },
+  { name: "Email Worker", uptime: 99.86, latency: "67ms", load: 79 },
+];
+
+const SECURITY_CHECKS: Array<{ title: string; status: "healthy" | "warning" }> = [
+  { title: "RBAC policy sync", status: "healthy" },
+  { title: "Admin MFA compliance", status: "warning" },
+  { title: "Token rotation", status: "healthy" },
+  { title: "Audit write pipeline", status: "healthy" },
+];
 
 export default function AdminSystemPage() {
-    const [systemHealth, setSystemHealth] = useState({
-        apiStatus: "operational",
-        dbLatency: "24ms",
-        errorRate: "0.01%",
-        lastBackup: "2 hours ago"
-    });
+  const [systemHealth] = useState({
+    apiStatus: "operational",
+    dbLatency: "24ms",
+    errorRate: "0.01%",
+    lastBackup: "2 hours ago",
+    activeNodes: 12,
+  });
 
-    return (
-        <div className={adminClassTokens.pageShell}>
-            <AdminSectionHeader
-                title="System Status"
-                description="Monitor platform health, logs, and security events."
-                aside={<Button variant="outline" size="sm" className="gap-2"><Activity className="h-4 w-4" /> View Live Logs</Button>}
-            />
+  const aggregate = useMemo(() => {
+    const avgLoad = Math.round(SERVICE_PANELS.reduce((sum, item) => sum + item.load, 0) / SERVICE_PANELS.length);
+    const avgUptime = (SERVICE_PANELS.reduce((sum, item) => sum + item.uptime, 0) / SERVICE_PANELS.length).toFixed(2);
+    return { avgLoad, avgUptime };
+  }, []);
 
-            {/* Health Stats */}
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
-                <AdminStatCard
-                    label="API Status"
-                    value={systemHealth.apiStatus === "operational" ? "Online" : "Issues"}
-                    tone={systemHealth.apiStatus === "operational" ? "success" : "critical"}
-                    icon={<Server className={`h-4 w-4 ${systemHealth.apiStatus === "operational" ? "text-green-600" : "text-red-600"}`} />}
-                    subtitle="99.9% Uptime"
-                />
-                <AdminStatCard
-                    label="Database Latency"
-                    value={systemHealth.dbLatency}
-                    tone={parseInt(systemHealth.dbLatency) < 50 ? "success" : "warning"}
-                    icon={<Database className="h-4 w-4 text-blue-500" />}
-                />
-                <AdminStatCard
-                    label="Error Rate"
-                    value={systemHealth.errorRate}
-                    tone="success"
-                    icon={<AlertOctagon className="h-4 w-4 text-purple-500" />}
-                />
-                <AdminStatCard
-                    label="Security Audits"
-                    value="Clean"
-                    tone="success"
-                    icon={<Shield className="h-4 w-4 text-green-500" />}
-                    subtitle={`Backup: ${systemHealth.lastBackup}`}
-                />
+  return (
+    <div className={adminClassTokens.pageShell}>
+      <AdminSectionHeader
+        title="System Status"
+        description="Infrastructure health, incident feed, and security posture across the entire platform."
+        aside={
+          <Button variant="outline" size="sm" className="gap-2">
+            <RefreshCcw className="h-4 w-4" /> Refresh snapshot
+          </Button>
+        }
+      />
+
+      <Card className="border-border/40 bg-gradient-to-r from-primary/10 via-card to-secondary/15">
+        <CardContent className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-5">
+          <AdminStatCard
+            label="API Status"
+            value={systemHealth.apiStatus === "operational" ? "Online" : "Issues"}
+            tone={systemHealth.apiStatus === "operational" ? "success" : "critical"}
+            icon={<Server className="h-4 w-4 text-emerald-600" />}
+            subtitle="99.9% uptime"
+          />
+          <AdminStatCard label="DB Latency" value={systemHealth.dbLatency} tone="success" icon={<Database className="h-4 w-4 text-blue-600" />} />
+          <AdminStatCard label="Error Rate" value={systemHealth.errorRate} tone="success" icon={<AlertOctagon className="h-4 w-4 text-secondary" />} />
+          <AdminStatCard label="Active Nodes" value={`${systemHealth.activeNodes}`} tone="secondary" icon={<Cpu className="h-4 w-4 text-primary" />} />
+          <AdminStatCard label="Backup" value={systemHealth.lastBackup} tone="accent" icon={<HardDrive className="h-4 w-4 text-amber-600" />} />
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 xl:grid-cols-[1.45fr_1fr]">
+        <Card className="border-border/60">
+          <CardHeader className="pb-3">
+            <CardTitle className="inline-flex items-center gap-2 text-base">
+              <Activity className="h-4 w-4 text-primary" /> Service Load Map
+            </CardTitle>
+            <CardDescription>Current utilization by core runtime services.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {SERVICE_PANELS.map((service) => (
+              <div key={service.name} className="rounded-xl border border-border/50 bg-muted/20 p-3">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <p className="text-sm font-medium text-foreground">{service.name}</p>
+                  <Badge variant="outline" className="text-[11px]">{service.latency}</Badge>
+                </div>
+                <Progress value={service.load} className="h-2" />
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Load {service.load}%</span>
+                  <span>Uptime {service.uptime}%</span>
+                </div>
+              </div>
+            ))}
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              <MiniMetric label="Avg cluster load" value={`${aggregate.avgLoad}%`} icon={<Globe className="h-3.5 w-3.5 text-primary" />} />
+              <MiniMetric label="Avg service uptime" value={`${aggregate.avgUptime}%`} icon={<Server className="h-3.5 w-3.5 text-primary" />} />
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="grid gap-6 md:grid-cols-2">
-                {/* Audit Logs Placeholder */}
-                <Card>
-                    <CardHeader>
-                        <AdminPanelHeader title="Recent Audit Logs" badge="Live" />
-                        <CardDescription>Security and administrative actions logged in real-time.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex items-start gap-4 p-3 rounded-lg border bg-muted/20 text-sm">
-                                    <Shield className="h-4 w-4 text-slate-400 mt-1" />
-                                    <div>
-                                        <p className="font-medium">User Role Updated</p>
-                                        <p className="text-muted-foreground text-xs">Admin updated User #{1000 + i} to 'Verified'</p>
-                                    </div>
-                                    <span className="ml-auto text-xs text-muted-foreground">2m ago</span>
-                                </div>
-                            ))}
-                        </div>
-                        <Button variant="ghost" className="w-full mt-4 text-muted-foreground">View All Logs</Button>
-                    </CardContent>
-                </Card>
+        <Card className="border-border/60">
+          <CardHeader className="pb-3">
+            <CardTitle className="inline-flex items-center gap-2 text-base">
+              <AlertOctagon className="h-4 w-4 text-primary" /> Incident Feed
+            </CardTitle>
+            <CardDescription>Latest operational events from monitoring channels.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {INCIDENT_FEED.map((incident) => (
+              <div key={incident.id} className="rounded-lg border border-border/50 px-3 py-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-medium text-foreground">{incident.title}</p>
+                  <SeverityBadge level={incident.severity} />
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{incident.id} - {incident.time}</p>
+              </div>
+            ))}
+            <Button variant="outline" className="w-full">Open incident console</Button>
+          </CardContent>
+        </Card>
+      </div>
 
-                {/* System Alerts */}
-                <Card>
-                    <CardHeader>
-                        <AdminPanelHeader title="System Alerts" />
-                        <CardDescription>Critical warnings and performance bottlenecks.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/10 rounded-xl border border-dashed">
-                            <CheckCircle className="h-10 w-10 text-green-500 mb-3" />
-                            <h4 className="font-semibold">All Systems Nominal</h4>
-                            <p className="text-sm text-muted-foreground">No active alerts at this time.</p>
-                        </div>
-                    </CardContent>
-                </Card>
+      <Card className="border-border/60">
+        <CardHeader className="pb-3">
+          <CardTitle className="inline-flex items-center gap-2 text-base">
+            <Shield className="h-4 w-4 text-primary" /> Security Control Plane
+          </CardTitle>
+          <CardDescription>Status of critical guardrails and admin security controls.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {SECURITY_CHECKS.map((check) => (
+            <div key={check.title} className="rounded-xl border border-border/50 bg-muted/20 p-3">
+              <p className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
+                <Lock className="h-3.5 w-3.5 text-primary" /> {check.title}
+              </p>
+              <p className="mt-2"><SecurityState status={check.status} /></p>
             </div>
-        </div>
-    );
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
-// Helper icon
-function CheckCircle({ className }: { className?: string }) {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
-    )
+function MiniMetric({ label, value, icon }: { label: string; value: string; icon: ReactNode }) {
+  return (
+    <div className="rounded-lg border border-border/50 bg-card/70 px-3 py-2">
+      <p className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground">{icon}{label}</p>
+      <p className="mt-1 text-base font-semibold text-foreground">{value}</p>
+    </div>
+  );
+}
+
+function SeverityBadge({ level }: { level: "low" | "medium" | "resolved" }) {
+  if (level === "resolved") return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">resolved</Badge>;
+  if (level === "medium") return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">medium</Badge>;
+  return <Badge variant="outline">low</Badge>;
+}
+
+function SecurityState({ status }: { status: "healthy" | "warning" }) {
+  if (status === "healthy") return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">healthy</Badge>;
+  return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">needs attention</Badge>;
 }

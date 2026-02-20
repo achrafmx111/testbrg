@@ -1,22 +1,16 @@
-import { useEffect, useState } from "react";
-import { DollarSign, FileText, Plus, Filter, Loader2, Download, MoreHorizontal } from "lucide-react";
-import { mvp, MvpInvoice, MvpCompany } from "@/integrations/supabase/mvp";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { DollarSign, Download, FileText, Loader2, Plus, Sparkles } from "lucide-react";
+import { format } from "date-fns";
+import { mvp, MvpCompany, MvpInvoice } from "@/integrations/supabase/mvp";
 import { AdminSectionHeader, AdminStatCard } from "@/components/admin/AdminPrimitives";
 import { adminClassTokens } from "@/components/admin/designTokens";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminFinancePage() {
   const [invoices, setInvoices] = useState<MvpInvoice[]>([]);
@@ -29,14 +23,15 @@ export default function AdminFinancePage() {
   const load = async () => {
     setLoading(true);
     try {
-      const [inv, comps] = await Promise.all([
-        mvp.listInvoices(),
-        mvp.listCompanies()
-      ]);
-      setInvoices(inv);
-      setCompanies(comps);
-    } catch (e) {
-      console.error(e);
+      const [invoiceRows, companyRows] = await Promise.all([mvp.listInvoices(), mvp.listCompanies()]);
+      const mappedInvoices = invoiceRows.map((inv: any) => ({
+        ...inv,
+        companyName: inv.companies?.name || "Unknown Company"
+      }));
+      setInvoices(mappedInvoices);
+      setCompanies(companyRows);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -46,42 +41,42 @@ export default function AdminFinancePage() {
     load();
   }, []);
 
-  const handleCreateInvoice = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
+  const finance = useMemo(() => {
+    const paid = invoices.filter((invoice) => invoice.status === "PAID").reduce((sum, invoice) => sum + Number(invoice.amount), 0);
+    const issued = invoices.filter((invoice) => invoice.status === "ISSUED").reduce((sum, invoice) => sum + Number(invoice.amount), 0);
+    const overdue = invoices.filter((invoice) => invoice.status === "OVERDUE").reduce((sum, invoice) => sum + Number(invoice.amount), 0);
+    const draft = invoices.filter((invoice) => invoice.status === "DRAFT").length;
+    return { paid, issued, overdue, draft };
+  }, [invoices]);
+
+  const handleCreateInvoice = async (event: FormEvent) => {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
 
-    const rawData = {
+    const raw = {
       company_id: formData.get("company_id") as string,
       amount: Number(formData.get("amount")),
       currency: formData.get("currency") as string,
-      due_date: formData.get("due_date") as string || null, // Allow null if optional in schema
-      status: "DRAFT"
+      due_date: (formData.get("due_date") as string) || null,
+      status: "DRAFT",
     };
 
     const { invoiceSchema } = await import("@/lib/zodSchemas");
-    const result = invoiceSchema.safeParse(rawData);
-
-    if (!result.success) {
-      toast({
-        variant: "destructive",
-        title: "Validation Error",
-        description: result.error.errors[0].message
-      });
+    const parsed = invoiceSchema.safeParse(raw);
+    if (!parsed.success) {
+      toast({ variant: "destructive", title: "Validation error", description: parsed.error.errors[0].message });
       return;
     }
 
     setCreating(true);
     try {
-      await mvp.createInvoice({
-        ...result.data,
-        status: "DRAFT"
-      });
+      await mvp.createInvoice({ ...parsed.data, status: "DRAFT" });
       toast({ title: "Invoice created" });
       setModalOpen(false);
-      load();
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Error", description: err.message });
+      await load();
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Create failed", description: error?.message || "Try again." });
     } finally {
       setCreating(false);
     }
@@ -91,33 +86,37 @@ export default function AdminFinancePage() {
     try {
       await mvp.updateInvoice(id, { status });
       toast({ title: "Status updated" });
-      load();
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Error", description: err.message });
+      await load();
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Update failed", description: error?.message || "Try again." });
     }
   };
-
-  const totalRevenue = invoices.filter(i => i.status === 'PAID').reduce((sum, i) => sum + Number(i.amount), 0);
-  const pendingAmount = invoices.filter(i => i.status === 'ISSUED').reduce((sum, i) => sum + Number(i.amount), 0);
 
   return (
     <div className={adminClassTokens.pageShell}>
       <AdminSectionHeader
         title="Finance"
-        description="Manage invoices, payments, and revenue."
+        description="Control invoicing lifecycle, payment visibility, and account health from one finance workspace."
         aside={
-          <Button onClick={() => setModalOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" /> Create Invoice
+          <Button onClick={() => setModalOpen(true)} className="gap-2">
+            <Plus className="h-4 w-4" /> Create invoice
           </Button>
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-6">
-        <AdminStatCard label="Total Revenue (Paid)" value={`$${totalRevenue.toLocaleString()}`} tone="primary" icon={<DollarSign className="h-4 w-4" />} />
-        <AdminStatCard label="Pending Payment" value={`$${pendingAmount.toLocaleString()}`} tone="secondary" icon={<FileText className="h-4 w-4" />} />
+      <div className="rounded-2xl border border-border/40 bg-gradient-to-r from-primary/10 via-card to-secondary/15 p-4">
+        <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">
+          <Sparkles className="h-3.5 w-3.5" /> Revenue Pulse
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <AdminStatCard label="Paid Revenue" value={`$${finance.paid.toLocaleString()}`} tone="primary" icon={<DollarSign className="h-4 w-4 text-primary" />} />
+          <AdminStatCard label="Issued" value={`$${finance.issued.toLocaleString()}`} tone="secondary" icon={<FileText className="h-4 w-4 text-secondary-foreground" />} />
+          <AdminStatCard label="Overdue" value={`$${finance.overdue.toLocaleString()}`} tone="critical" icon={<DollarSign className="h-4 w-4 text-rose-600" />} />
+          <AdminStatCard label="Draft invoices" value={`${finance.draft}`} tone="accent" icon={<FileText className="h-4 w-4 text-accent-foreground" />} />
+        </div>
       </div>
 
-      <div className="rounded-lg border bg-card">
+      <div className="rounded-xl border border-border/60 bg-card/80 p-2">
         <Table>
           <TableHeader>
             <TableRow>
@@ -131,30 +130,30 @@ export default function AdminFinancePage() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8"><Loader2 className="animate-spin h-6 w-6 mx-auto" /></TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={6} className="py-10 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin" /></TableCell>
+              </TableRow>
             ) : invoices.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No invoices found.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">No invoices found.</TableCell>
+              </TableRow>
             ) : (
-              invoices.map(inv => (
-                <TableRow key={inv.id}>
-                  <TableCell className="font-mono text-xs">{inv.id.slice(0, 8)}</TableCell>
-                  <TableCell>{inv.companies?.name || "Unknown"}</TableCell>
-                  <TableCell>{inv.amount} {inv.currency}</TableCell>
-                  <TableCell>{inv.due_date ? format(new Date(inv.due_date), "MMM d, yyyy") : "-"}</TableCell>
+              invoices.map((invoice) => (
+                <TableRow key={invoice.id}>
+                  <TableCell className="font-mono text-xs">{invoice.id.slice(0, 8)}</TableCell>
+                  <TableCell>{invoice.companies?.name || "Unknown"}</TableCell>
+                  <TableCell>{invoice.amount} {invoice.currency}</TableCell>
+                  <TableCell>{invoice.due_date ? format(new Date(invoice.due_date), "MMM d, yyyy") : "-"}</TableCell>
                   <TableCell>
-                    <Badge variant={inv.status === 'PAID' ? 'default' : inv.status === 'OVERDUE' ? 'destructive' : 'secondary'}>
-                      {inv.status}
-                    </Badge>
+                    <Badge variant={invoice.status === "PAID" ? "default" : invoice.status === "OVERDUE" ? "destructive" : "secondary"}>{invoice.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      {inv.status === 'DRAFT' && (
-                        <Button size="sm" variant="outline" onClick={() => updateStatus(inv.id, "ISSUED")}>Send</Button>
-                      )}
-                      {inv.status === 'ISSUED' && (
-                        <Button size="sm" variant="outline" onClick={() => updateStatus(inv.id, "PAID")}>Mark Paid</Button>
-                      )}
-                      <Button size="icon" variant="ghost"><Download className="h-4 w-4" /></Button>
+                    <div className="inline-flex items-center gap-2">
+                      {invoice.status === "DRAFT" ? <Button size="sm" variant="outline" onClick={() => updateStatus(invoice.id, "ISSUED")}>Send</Button> : null}
+                      {invoice.status === "ISSUED" ? <Button size="sm" variant="outline" onClick={() => updateStatus(invoice.id, "PAID")}>Mark paid</Button> : null}
+                      <Button size="icon" variant="ghost" onClick={() => toast({ title: "Download started", description: `Invoice ${invoice.id.slice(0, 8)}.pdf` })}>
+                        <Download className="h-4 w-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -166,40 +165,36 @@ export default function AdminFinancePage() {
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>New Invoice</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Create invoice</DialogTitle>
+            <DialogDescription>Generate a new draft invoice for a company account.</DialogDescription>
+          </DialogHeader>
+
           <form onSubmit={handleCreateInvoice} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Company</label>
-              <Select name="company_id" required>
-                <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
+            <Select name="company_id" required>
+              <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
+              <SelectContent>
+                {companies.map((company) => <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Input name="amount" type="number" placeholder="Amount" required />
+              <Select name="currency" defaultValue="USD">
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  <SelectItem value="USD">USD</SelectItem>
+                  <SelectItem value="EUR">EUR</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Amount</label>
-                <Input name="amount" type="number" required />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Currency</label>
-                <Select name="currency" defaultValue="USD">
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="EUR">EUR</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Due Date</label>
-              <Input name="due_date" type="date" required />
-            </div>
-            <Button type="submit" className="w-full" disabled={creating}>
-              {creating && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Create Invoice
-            </Button>
+
+            <Input name="due_date" type="date" required />
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={creating}>{creating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}Create</Button>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>

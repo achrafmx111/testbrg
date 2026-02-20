@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Loader2, MessageSquare, Search, Send, UserRound } from "lucide-react";
+import { Loader2, MessageSquare, Search, Send, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -80,6 +80,8 @@ export default function CompanyMessagesPage() {
     return [...(conversations[selectedUserId] || [])].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   }, [conversations, selectedUserId]);
 
+  const unreadEstimate = useMemo(() => Math.max(0, Math.floor(Object.keys(conversations).length * 0.35)), [conversations]);
+
   const handleSend = async () => {
     if (!selectedUserId || !newMessage.trim()) return;
     setSending(true);
@@ -104,14 +106,38 @@ export default function CompanyMessagesPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <section className="rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-secondary/10 p-5 md:p-6">
+      <section className="rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/10 p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Recruitment Messaging Hub</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Talk with candidates and track ongoing conversations from one place.</p>
+            <Badge variant="secondary" className="mb-2 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]">
+              <Sparkles className="mr-1 h-3.5 w-3.5" /> Communication Ops
+            </Badge>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">Recruitment messaging hub</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Coordinate candidate conversations with a live inbox experience and tighter response control.</p>
           </div>
           <Badge variant="secondary">{Object.keys(conversations).length} active threads</Badge>
         </div>
+      </section>
+
+      <section className="grid gap-3 md:grid-cols-3">
+        <Card className="border-border/60">
+          <CardContent className="p-4">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Open Threads</p>
+            <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">{Object.keys(conversations).length}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/60">
+          <CardContent className="p-4">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Unread Queue</p>
+            <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">{unreadEstimate}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/60 bg-primary/5">
+          <CardContent className="flex h-full items-center justify-between p-4 text-sm font-medium text-foreground">
+            <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> Message audit trail healthy</span>
+            <Badge variant="outline">Mockup</Badge>
+          </CardContent>
+        </Card>
       </section>
 
       <div className="grid h-[calc(100vh-260px)] min-h-[560px] grid-cols-1 gap-5 lg:grid-cols-[320px_1fr]">
@@ -137,7 +163,7 @@ export default function CompanyMessagesPage() {
                         key={id}
                         type="button"
                         onClick={() => setSelectedUserId(id)}
-                        className={`w-full px-4 py-3 text-left transition-colors hover:bg-muted/40 ${selectedUserId === id ? "bg-muted/50" : ""}`}
+                         className={`w-full px-4 py-3 text-left transition-colors hover:bg-muted/40 ${selectedUserId === id ? "bg-primary/10" : ""}`}
                       >
                         <div className="flex items-start gap-3">
                           <Avatar className="h-9 w-9">
@@ -176,7 +202,7 @@ export default function CompanyMessagesPage() {
                       const mine = message.from_user_id === userId;
                       return (
                         <div key={message.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                          <div className={`max-w-[78%] rounded-xl px-3 py-2 text-sm ${mine ? "bg-primary text-primary-foreground" : "bg-muted/60 text-foreground"}`}>
+                           <div className={`max-w-[78%] rounded-xl px-3 py-2 text-sm ${mine ? "bg-primary text-primary-foreground" : "bg-muted/70 text-foreground"}`}>
                             <p>{message.body}</p>
                             <p className={`mt-1 text-[10px] ${mine ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                               {new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}

@@ -110,16 +110,16 @@ export const MvpCandidateCard = ({
                                     <User className="h-8 w-8 text-slate-400 group-hover:text-primary transition-colors" />
                                 </div>
                                 {isJobReady && (
-                                    <div className="absolute -top-1 -right-1 h-5 w-5 bg-gold rounded-full border-2 border-white dark:border-slate-950 flex items-center justify-center shadow-lg">
-                                        <Zap className="h-3 w-3 text-navy fill-navy" />
+                                    <div className="absolute -top-1 -right-1 h-5 w-5 bg-secondary rounded-full border-2 border-white dark:border-slate-950 flex items-center justify-center shadow-lg">
+                                        <Zap className="h-3 w-3 text-secondary-foreground fill-secondary-foreground" />
                                     </div>
                                 )}
                             </div>
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2">
-                                    <h3 className="text-xl font-bold tracking-tight text-navy dark:text-white">Candidate #{candidate.user_id.slice(0, 5)}</h3>
+                                    <h3 className="text-xl font-bold tracking-tight text-foreground">Candidate #{candidate.user_id.slice(0, 5)}</h3>
                                     {matchScore !== undefined && matchScore > 85 && (
-                                        <Sparkles className="h-4 w-4 text-gold animate-pulse" />
+                                        <Sparkles className="h-4 w-4 text-secondary animate-pulse" />
                                     )}
                                 </div>
                                 <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-slate-400">
@@ -142,7 +142,7 @@ export const MvpCandidateCard = ({
                                                 </Badge>
                                             </div>
                                         </TooltipTrigger>
-                                        <TooltipContent className="bg-navy-dark text-white border-none p-4 rounded-xl shadow-2xl">
+                                        <TooltipContent className="bg-card text-foreground border p-4 rounded-xl shadow-2xl">
                                             <div className="space-y-2 w-48">
                                                 <p className="font-bold text-xs uppercase tracking-widest text-slate-400">AI Score Breakdown</p>
                                                 <div className="space-y-1">
@@ -161,7 +161,7 @@ export const MvpCandidateCard = ({
 
                 <CardContent className="pt-6 space-y-6 flex-1">
                     {isFavorite && (
-                        <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-navy/10 border border-border/40">
+                        <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/40">
                             <div className="flex items-center gap-2">
                                 <Badge className="bg-primary shadow-lg shadow-primary/20 text-[10px] px-3 font-black uppercase tracking-widest rounded-full">
                                     {pipelineStatus.replace('_', ' ')}
@@ -172,10 +172,10 @@ export const MvpCandidateCard = ({
                                 onValueChange={(v) => onUpdatePipelineStatus(candidate.user_id, v)}
                                 disabled={['hired', 'rejected'].includes(pipelineStatus)}
                             >
-                                <SelectTrigger className="h-9 w-40 bg-white dark:bg-navy/20 border-none rounded-xl text-xs font-bold shadow-sm text-navy dark:text-white">
+                                <SelectTrigger className="h-9 w-40 bg-background border-none rounded-xl text-xs font-bold shadow-sm text-foreground">
                                     <SelectValue placeholder="Update Stage" />
                                 </SelectTrigger>
-                                <SelectContent className="rounded-xl border-none shadow-2xl bg-white dark:bg-navy-dark">
+                                <SelectContent className="rounded-xl shadow-2xl bg-background">
                                     {PIPELINE_OPTIONS.map((opt) => (
                                         <SelectItem key={opt.value} value={opt.value} className="font-medium">
                                             {opt.label}
@@ -190,11 +190,11 @@ export const MvpCandidateCard = ({
                         <div className="space-y-4">
                             <div>
                                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3 flex items-center gap-2">
-                                    <Zap className="h-3 w-3 text-gold fill-gold" /> Key Skills
+                                    <Zap className="h-3 w-3 text-secondary fill-secondary" /> Key Skills
                                 </h4>
                                 <div className="flex flex-wrap gap-1.5">
                                     {candidate.skills?.slice(0, 4).map((skill, idx) => (
-                                        <Badge key={idx} variant="secondary" className="bg-slate-100 dark:bg-navy/20 text-[10px] h-6 px-2.5 font-bold rounded-lg border-none hover:bg-primary/10 hover:text-primary transition-colors cursor-default text-navy dark:text-slate-300">
+                                        <Badge key={idx} variant="secondary" className="bg-muted text-[10px] h-6 px-2.5 font-bold rounded-lg border-none hover:bg-primary/10 hover:text-primary transition-colors cursor-default text-foreground">
                                             {skill}
                                         </Badge>
                                     ))}
@@ -221,7 +221,7 @@ export const MvpCandidateCard = ({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 p-4 rounded-3xl bg-slate-50 dark:bg-navy/10 border border-slate-100 dark:border-navy/40">
+                    <div className="grid grid-cols-3 gap-4 p-4 rounded-3xl bg-muted/40 border border-border/60">
                         <div className="text-center space-y-1">
                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Coach</span>
                             <div className="flex justify-center items-center gap-1 text-primary">
@@ -231,8 +231,8 @@ export const MvpCandidateCard = ({
                         </div>
                         <div className="text-center space-y-1 border-x border-slate-200 dark:border-navy/40">
                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Rating</span>
-                            <div className="flex justify-center items-center gap-1 text-gold">
-                                <Star className="h-3 w-3 fill-gold" />
+                            <div className="flex justify-center items-center gap-1 text-secondary">
+                                <Star className="h-3 w-3 fill-secondary" />
                                 <span className="text-sm font-black">4.8</span>
                             </div>
                         </div>
@@ -240,20 +240,20 @@ export const MvpCandidateCard = ({
                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</span>
                             <div className="flex justify-center items-center gap-1">
                                 <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary))] animate-pulse" />
-                                <span className="text-[10px] font-black text-navy dark:text-slate-300 uppercase tracking-widest">Active</span>
+                                <span className="text-[10px] font-black text-foreground uppercase tracking-widest">Active</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Private Employer Note */}
                     {isFavorite && (
-                        <div className="bg-gold/5 dark:bg-gold/5 p-4 rounded-2xl border border-gold/10 dark:border-gold/10">
+                        <div className="bg-secondary/10 p-4 rounded-2xl border border-secondary/20">
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-[10px] font-black text-gold-dark dark:text-gold flex items-center gap-2 tracking-widest uppercase">
-                                    <Star className="h-3 w-3 fill-gold" /> Recruiter Notes
+                                <span className="text-[10px] font-black text-secondary flex items-center gap-2 tracking-widest uppercase">
+                                    <Star className="h-3 w-3 fill-secondary" /> Recruiter Notes
                                 </span>
                                 <button
-                                    className="text-[10px] font-black text-gold hover:text-gold-dark transition-colors uppercase tracking-widest"
+                                    className="text-[10px] font-black text-secondary hover:text-secondary/80 transition-colors uppercase tracking-widest"
                                     onClick={() => {
                                         setEditingNote(candidate.user_id);
                                         setTempNote(favorite.notes || "");
@@ -265,7 +265,7 @@ export const MvpCandidateCard = ({
                             {editingNote === candidate.user_id ? (
                                 <div className="space-y-3">
                                     <textarea
-                                        className="w-full text-xs p-3 border-none rounded-xl bg-white dark:bg-navy-dark shadow-inner resize-none focus:ring-1 focus:ring-gold/20 text-navy dark:text-white"
+                                        className="w-full text-xs p-3 border-none rounded-xl bg-background shadow-inner resize-none focus:ring-1 focus:ring-secondary/20 text-foreground"
                                         value={tempNote}
                                         onChange={(e) => setTempNote(e.target.value)}
                                         placeholder="Add private evaluation notes..."
@@ -273,13 +273,13 @@ export const MvpCandidateCard = ({
                                     />
                                     <div className="flex justify-end gap-2">
                                         <Button size="sm" variant="ghost" className="h-8 text-[10px] font-bold rounded-lg uppercase tracking-widest" onClick={() => setEditingNote(null)}>Cancel</Button>
-                                        <Button size="sm" className="h-8 px-4 bg-gold hover:bg-gold-dark text-navy text-[10px] font-bold rounded-lg uppercase tracking-widest" onClick={() => onSaveNote(candidate.user_id, tempNote)} disabled={isSavingNote}>
+                                        <Button size="sm" className="h-8 px-4 bg-secondary hover:bg-secondary/90 text-secondary-foreground text-[10px] font-bold rounded-lg uppercase tracking-widest" onClick={() => onSaveNote(candidate.user_id, tempNote)} disabled={isSavingNote}>
                                             {isSavingNote ? "Saving..." : "Save Note"}
                                         </Button>
                                     </div>
                                 </div>
                             ) : (
-                                <p className="text-xs text-gold-dark dark:text-gold/80 italic leading-relaxed">
+                                <p className="text-xs text-secondary/90 italic leading-relaxed">
                                     {favorite.notes || "No private notes. Add your evaluation to keep track of this candidate."}
                                 </p>
                             )}
@@ -302,7 +302,7 @@ export const MvpCandidateCard = ({
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className={`h-14 w-14 rounded-2xl transition-all duration-300 ${isFavorite ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'bg-slate-100 hover:bg-slate-200 dark:bg-navy/20 text-slate-500'}`}
+                                            className={`h-14 w-14 rounded-2xl transition-all duration-300 ${isFavorite ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'bg-muted hover:bg-muted/80 text-muted-foreground'}`}
                                             onClick={() => onToggleFavorite(candidate.user_id)}
                                         >
                                             <Heart className={`h-6 w-6 ${isFavorite ? "fill-primary text-primary scale-110" : ""}`} />
@@ -314,15 +314,15 @@ export const MvpCandidateCard = ({
 
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-14 w-14 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-navy/20 text-slate-500">
+                                    <Button variant="ghost" size="icon" className="h-14 w-14 rounded-2xl bg-muted hover:bg-muted/80 text-muted-foreground">
                                         <MoreHorizontal className="h-6 w-6" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl border-none bg-white dark:bg-navy-dark">
-                                    <DropdownMenuItem className="h-11 rounded-xl gap-3 font-semibold focus:bg-primary/5 cursor-pointer text-navy dark:text-white" onClick={() => onRequestInterview(candidate)}>
-                                        <Calendar className="h-4 w-4 text-gold" /> Request Interview
+                                <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl bg-background">
+                                    <DropdownMenuItem className="h-11 rounded-xl gap-3 font-semibold focus:bg-primary/5 cursor-pointer text-foreground" onClick={() => onRequestInterview(candidate)}>
+                                        <Calendar className="h-4 w-4 text-secondary" /> Request Interview
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="h-11 rounded-xl gap-3 font-semibold focus:bg-primary/5 cursor-pointer text-navy dark:text-white" onClick={() => onMessageCandidate(candidate)}>
+                                    <DropdownMenuItem className="h-11 rounded-xl gap-3 font-semibold focus:bg-primary/5 cursor-pointer text-foreground" onClick={() => onMessageCandidate(candidate)}>
                                         <MessageSquare className="h-4 w-4 text-primary" /> Direct Message
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>

@@ -101,6 +101,8 @@ import { AdminReferralAnalytics } from "./components/AdminReferralAnalytics";
 import { AdminSystemHealth } from "./components/AdminSystemHealth";
 import { Application, InterviewRequest } from "@/types";
 import { format } from "date-fns";
+import { mvpSchema } from "@/integrations/supabase/mvp";
+
 
 const AdminDashboard = () => {
     const { t, i18n } = useTranslation();
@@ -134,7 +136,7 @@ const AdminDashboard = () => {
     const fetchInterviewRequests = useCallback(async () => {
         setLoadingInterviews(true);
         try {
-            const { data, error } = await (supabase as any)
+            const { data, error } = await mvpSchema
                 .from('interview_requests')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -160,7 +162,7 @@ const AdminDashboard = () => {
     const handleInterviewAction = async (id: string, action: 'approved' | 'rejected', applicationId: string) => {
         try {
             // 1. Update Request Status
-            const { error } = await (supabase as any)
+            const { error } = await mvpSchema
                 .from('interview_requests')
                 .update({ status: action })
                 .eq('id', id);
@@ -320,7 +322,7 @@ const AdminDashboard = () => {
 
     const fetchActivityLogs = async (id: string) => {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await mvpSchema
                 .from('application_activity_logs')
                 .select('*')
                 .eq('application_id', id)
@@ -338,7 +340,6 @@ const AdminDashboard = () => {
             fetchActivityLogs(activeApp.id);
         }
     }, [activeApp, drawerOpen]);
-
     const filteredApplications = applications.filter(app => {
         const matchesSearch =
             app.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1164,42 +1165,57 @@ const AdminDashboard = () => {
                                                     No interview requests found.
                                                 </TableCell>
                                             </TableRow>
-                                        ) : interviewRequests.map((req: any) => (
-                                            <TableRow key={req.id}>
-                                                <TableCell className="font-medium text-xs">
-                                                    {req.employer?.email || "Unknown Employer"}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-xs">{req.application?.name || "Unknown Candidate"}</span>
-                                                        <span className="text-[10px] text-muted-foreground">{req.application?.sap_track}</span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="max-w-[200px]">
-                                                    <p className="truncate text-xs text-muted-foreground" title={req.notes}>{req.notes || "No message"}</p>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant="outline" className={`text-[10px] ${req.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
-                                                        req.status === 'approved' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                            'bg-red-50 text-red-700 border-red-200'
-                                                        }`}>
-                                                        {req.status?.toUpperCase() || 'UNKNOWN'}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    {req.status === 'pending' && (
-                                                        <div className="flex justify-end gap-1">
-                                                            <Button size="sm" className="h-7 text-[10px] bg-green-600 hover:bg-green-700" onClick={() => handleInterviewAction(req.id, 'approved', req.application_id)}>
-                                                                Approve
-                                                            </Button>
-                                                            <Button size="sm" variant="outline" className="h-7 text-[10px] text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleInterviewAction(req.id, 'rejected', req.application_id)}>
-                                                                Reject
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
+                                        ) : (
+                                            interviewRequests.map((req: any) => {
+                                                const statusClass =
+                                                    req.status === "pending"
+                                                        ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                                                        : req.status === "approved"
+                                                            ? "bg-green-50 text-green-700 border-green-200"
+                                                            : "bg-red-50 text-red-700 border-red-200";
+
+                                                return (
+                                                    <TableRow key={req.id}>
+                                                        <TableCell className="font-medium text-xs">{req.employer?.email || "Unknown Employer"}</TableCell>
+                                                        <TableCell>
+                                                            <div className="flex flex-col">
+                                                                <span className="font-bold text-xs">{req.application?.name || "Unknown Candidate"}</span>
+                                                                <span className="text-[10px] text-muted-foreground">{req.application?.sap_track}</span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="max-w-[200px]">
+                                                            <p className="truncate text-xs text-muted-foreground" title={req.notes}>{req.notes || "No message"}</p>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge variant="outline" className={`text-[10px] ${statusClass}`}>
+                                                                {req.status?.toUpperCase() || "UNKNOWN"}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            {req.status === "pending" && (
+                                                                <div className="flex justify-end gap-1">
+                                                                    <Button
+                                                                        size="sm"
+                                                                        className="h-7 text-[10px] bg-green-600 hover:bg-green-700"
+                                                                        onClick={() => handleInterviewAction(req.id, "approved", req.application_id)}
+                                                                    >
+                                                                        Approve
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        className="h-7 text-[10px] text-red-600 border-red-200 hover:bg-red-50"
+                                                                        onClick={() => handleInterviewAction(req.id, "rejected", req.application_id)}
+                                                                    >
+                                                                        Reject
+                                                                    </Button>
+                                                                </div>
+                                                            )}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })
+                                        )}
                                     </TableBody>
                                 </Table>
                             </div>

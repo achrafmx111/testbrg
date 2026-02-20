@@ -1,98 +1,216 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BarChart3, Calendar, Clock3, Download, PieChart, Sparkles, Target, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Download, Calendar, TrendingUp, Users, Clock, Target } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TimeToHireChart } from "./analytics/TimeToHireChart";
 import { FunnelChart } from "./analytics/FunnelChart";
+import { toast } from "sonner";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
+const SOURCING_DATA = [
+  { name: "LinkedIn", value: 45 },
+  { name: "Referrals", value: 25 },
+  { name: "Website", value: 20 },
+  { name: "Job Boards", value: 10 },
+];
+
+const CHANNEL_HIRING = [
+  { name: "LinkedIn", hired: 12 },
+  { name: "Referrals", hired: 8 },
+  { name: "Website", hired: 3 },
+  { name: "Job Boards", hired: 2 },
+];
+
+const COLORS = ["#2563eb", "#0f766e", "#d97706", "#7c3aed"];
+
+const PIPELINE_HISTORY = [
+  { name: "Week 1", applicants: 20, interviews: 5, offers: 1 },
+  { name: "Week 2", applicants: 35, interviews: 12, offers: 3 },
+  { name: "Week 3", applicants: 50, interviews: 25, offers: 6 },
+  { name: "Week 4", applicants: 45, interviews: 22, offers: 5 },
+  { name: "Week 5", applicants: 60, interviews: 30, offers: 9 },
+];
+
+type KpiCardProps = {
+  title: string;
+  value: string;
+  trend: string;
+  tone: "good" | "neutral";
+  icon: React.ComponentType<{ className?: string }>;
+};
 
 export default function CompanyAnalyticsPage() {
-    return (
-        <div className="space-y-8 p-8 animate-in fade-in duration-500">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                        Analytics Hub
-                        <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20">BETA</span>
-                    </h1>
-                    <p className="text-slate-500 font-medium">Data-driven insights to optimize your hiring process.</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <Select defaultValue="30d">
-                        <SelectTrigger className="w-[180px] h-10 rounded-lg bg-white dark:bg-slate-800 border-slate-200 shadow-sm font-medium">
-                            <Calendar className="mr-2 h-4 w-4 text-slate-500" />
-                            <SelectValue placeholder="Select range" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="7d">Last 7 days</SelectItem>
-                            <SelectItem value="30d">Last 30 days</SelectItem>
-                            <SelectItem value="90d">Last quarter</SelectItem>
-                            <SelectItem value="1y">Last year</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <Button variant="outline" className="h-10 rounded-lg border-slate-200 shadow-sm">
-                        <Download className="mr-2 h-4 w-4" /> Export Report
-                    </Button>
-                </div>
-            </div>
-
-            {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <KPICard title="Time to Hire" value="28 Days" trend="-12%" trendUp={true} icon={Clock} />
-                <KPICard title="Offer Acceptance" value="85%" trend="+5%" trendUp={true} icon={Target} />
-                <KPICard title="Total Applicants" value="248" trend="+22%" trendUp={true} icon={Users} />
-                <KPICard title="Cost per Hire" value="€1,250" trend="-5%" trendUp={true} icon={TrendingUp} />
-            </div>
-
-            {/* Main Charts */}
-            <Tabs defaultValue="hiring" className="w-full">
-                <TabsList className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl mb-6">
-                    <TabsTrigger value="hiring" className="rounded-lg font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">Hiring Performance</TabsTrigger>
-                    <TabsTrigger value="pipeline" className="rounded-lg font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">Pipeline Health</TabsTrigger>
-                    <TabsTrigger value="sourcing" className="rounded-lg font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">Sourcing Channels</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="hiring" className="space-y-6">
-                    <div className="grid lg:grid-cols-2 gap-6">
-                        <TimeToHireChart />
-                        <FunnelChart />
-                    </div>
-                </TabsContent>
-
-                <TabsContent value="pipeline">
-                    <div className="flex items-center justify-center h-[400px] bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                        <p className="text-slate-400 font-medium">Detailed pipeline analytics coming soon...</p>
-                    </div>
-                </TabsContent>
-
-                <TabsContent value="sourcing">
-                    <div className="flex items-center justify-center h-[400px] bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                        <p className="text-slate-400 font-medium">Sourcing channel analytics coming soon...</p>
-                    </div>
-                </TabsContent>
-            </Tabs>
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <section className="rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/10 p-5 md:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <Badge variant="secondary" className="mb-2 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]">
+              <Sparkles className="mr-1 h-3.5 w-3.5" /> Decision Intelligence
+            </Badge>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Analytics hub</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Data-driven visibility over pipeline speed, quality, and conversion outcomes.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Select defaultValue="30d">
+              <SelectTrigger className="w-[180px]">
+                <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="Select range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7d">Last 7 days</SelectItem>
+                <SelectItem value="30d">Last 30 days</SelectItem>
+                <SelectItem value="90d">Last quarter</SelectItem>
+                <SelectItem value="1y">Last year</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={() => toast.info("Export generation started. Check your email shortly.")}> 
+              <Download className="mr-2 h-4 w-4" /> Export report
+            </Button>
+          </div>
         </div>
-    );
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <KpiCard title="Time to hire" value="28 days" trend="-12% vs previous period" tone="good" icon={Clock3} />
+        <KpiCard title="Offer acceptance" value="85%" trend="+5% this month" tone="good" icon={Target} />
+        <KpiCard title="Total applicants" value="248" trend="+22% pipeline inflow" tone="good" icon={Users} />
+        <KpiCard title="Cost per hire" value="EUR 1,250" trend="Stable spend" tone="neutral" icon={TrendingUp} />
+      </section>
+
+      <Tabs defaultValue="hiring" className="w-full">
+        <TabsList className="mb-4 grid w-full max-w-[620px] grid-cols-3 rounded-xl border border-border/60 bg-card p-1">
+          <TabsTrigger value="hiring" className="rounded-lg">Hiring performance</TabsTrigger>
+          <TabsTrigger value="pipeline" className="rounded-lg">Pipeline health</TabsTrigger>
+          <TabsTrigger value="sourcing" className="rounded-lg">Sourcing channels</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="hiring" className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <TimeToHireChart />
+            <FunnelChart />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="pipeline" className="space-y-6">
+          <Card className="border-border/60">
+            <CardHeader>
+              <CardTitle className="inline-flex items-center gap-2 text-lg">
+                <BarChart3 className="h-4 w-4 text-primary" /> Pipeline growth
+              </CardTitle>
+              <CardDescription>Weekly volume trend for applicants, interviews, and offers.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[380px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={PIPELINE_HISTORY} margin={{ top: 10, right: 20, left: 4, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.28} />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))" }} />
+                    <Legend />
+                    <Line type="monotone" dataKey="applicants" stroke="#2563eb" strokeWidth={3} activeDot={{ r: 6 }} />
+                    <Line type="monotone" dataKey="interviews" stroke="#0f766e" strokeWidth={3} />
+                    <Line type="monotone" dataKey="offers" stroke="#d97706" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sourcing" className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card className="border-border/60">
+              <CardHeader>
+                <CardTitle className="inline-flex items-center gap-2 text-lg">
+                  <PieChart className="h-4 w-4 text-primary" /> Channel distribution
+                </CardTitle>
+                <CardDescription>Where incoming candidates originate.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[340px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={SOURCING_DATA} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.28} vertical={false} />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))" }} />
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                        {SOURCING_DATA.map((entry, index) => (
+                          <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/60">
+              <CardHeader>
+                <CardTitle className="text-lg">Channel performance</CardTitle>
+                <CardDescription>Hires completed by channel source.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[340px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={CHANNEL_HIRING}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={52}
+                        outerRadius={112}
+                        dataKey="hired"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={false}
+                      >
+                        {CHANNEL_HIRING.map((entry, index) => (
+                          <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))" }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 }
 
-function KPICard({ title, value, trend, trendUp, icon: Icon }: any) {
-    return (
-        <Card className="rounded-2xl shadow-sm hover:shadow-md transition-all border-slate-200 dark:border-slate-800">
-            <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                    <p className="text-sm font-bold text-slate-500">{title}</p>
-                    <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300">
-                        <Icon className="h-4 w-4" />
-                    </div>
-                </div>
-                <div className="flex items-end justify-between">
-                    <h3 className="text-2xl font-black text-slate-900 dark:text-white">{value}</h3>
-                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${trendUp ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {trend}
-                    </span>
-                </div>
-            </CardContent>
-        </Card>
-    );
+function KpiCard({ title, value, trend, tone, icon: Icon }: KpiCardProps) {
+  return (
+    <Card className="border-border/60">
+      <CardContent className="p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">{title}</p>
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Icon className="h-4 w-4" />
+          </span>
+        </div>
+        <p className="text-2xl font-bold tracking-tight text-foreground">{value}</p>
+        <p className={`mt-1 text-xs ${tone === "good" ? "text-emerald-600" : "text-muted-foreground"}`}>{trend}</p>
+      </CardContent>
+    </Card>
+  );
 }

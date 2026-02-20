@@ -68,7 +68,7 @@ export interface TalentProfile extends Application {
 }
 
 export interface EmployerFavorite {
-    application_id: string;
+    talent_id: string;
     employer_id: string;
     notes: string;
     pipeline_status: string;

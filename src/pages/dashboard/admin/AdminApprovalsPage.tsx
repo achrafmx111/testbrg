@@ -90,10 +90,7 @@ export default function AdminApprovalsPage() {
           if (error) throw error;
           toast({ title: "Approved", description: "Company account created." });
         } else {
-          // Reject logic (MVP usually just update status)
-          await supabase.from("mvp_company_registration_requests")
-            .update({ status: "REJECTED" })
-            .eq("id", req.id);
+          await mvp.updateRegistrationRequest(req.id, { status: "REJECTED" });
           toast({ title: "Rejected", description: "Request marked as rejected." });
         }
         await load(); // Reload to get fresh state

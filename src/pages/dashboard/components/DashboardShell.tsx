@@ -128,8 +128,7 @@ export const DashboardShell = ({
       return [];
     }
   });
-  const [onboardingOpen, setOnboardingOpen] = useState(false);
-  const [onboardingStepIndex, setOnboardingStepIndex] = useState(0);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -181,8 +180,7 @@ export const DashboardShell = ({
   }, [pageContext.key]);
 
   const quickActions = useMemo(() => getQuickActions(pageContext.key), [pageContext.key]);
-  const recentActivity = useMemo(() => getRecentActivity(pageContext.key), [pageContext.key]);
-  const onboardingSteps = useMemo(() => getOnboardingSteps(pageContext.key), [pageContext.key]);
+
 
   const pinnedNavItems = useMemo(
     () => pinnedPaths
@@ -195,13 +193,7 @@ export const DashboardShell = ({
     localStorage.setItem(PINNED_NAV_KEY, JSON.stringify(pinnedPaths));
   }, [pinnedPaths]);
 
-  useEffect(() => {
-    setOnboardingStepIndex(0);
-    const seenKey = `${ONBOARDING_SEEN_KEY}:${pageContext.key}`;
-    if (!localStorage.getItem(seenKey)) {
-      setOnboardingOpen(true);
-    }
-  }, [pageContext.key]);
+
 
   const markAllNotificationsRead = () => {
     setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
@@ -219,10 +211,7 @@ export const DashboardShell = ({
     ));
   };
 
-  const completeOnboarding = () => {
-    localStorage.setItem(`${ONBOARDING_SEEN_KEY}:${pageContext.key}`, "1");
-    setOnboardingOpen(false);
-  };
+
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
@@ -636,24 +625,7 @@ export const DashboardShell = ({
                       </div>
                     </div>
                   </section>
-                  <section className="mb-6 rounded-2xl border border-border/50 bg-card/90 p-4 shadow-sm">
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Recent Activity</p>
-                      <Button variant="ghost" size="sm" className="h-7 text-[11px]" onClick={() => setCommandOpen(true)}>
-                        Open Command
-                      </Button>
-                    </div>
-                    <div className="grid gap-2 md:grid-cols-3">
-                      {recentActivity.map((activity) => (
-                        <div key={activity.id} className="rounded-xl border border-border/40 bg-muted/20 px-3 py-2.5">
-                          <p className="text-xs font-semibold text-foreground">{activity.title}</p>
-                          <p className="mt-1 inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-                            <Clock3 className="h-3 w-3" /> {activity.meta}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
+
                 </>
               )}
               <div className="dashboard-content-grid">{children}</div>
@@ -692,72 +664,7 @@ export const DashboardShell = ({
         </DropdownMenu>
       </div>
 
-      <Dialog open={onboardingOpen} onOpenChange={setOnboardingOpen}>
-        <DialogContent className="max-w-xl border-border/50 bg-card/95">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <Sparkles className="h-5 w-5 text-primary" />
-              Welcome to {pageContext.title}
-            </DialogTitle>
-            <DialogDescription>
-              Quick setup tour to help you navigate this workspace faster.
-            </DialogDescription>
-          </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted/40">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-300"
-                style={{ width: `${((onboardingStepIndex + 1) / onboardingSteps.length) * 100}%` }}
-              />
-            </div>
-
-            <div className="rounded-xl border border-border/50 bg-muted/20 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                Step {onboardingStepIndex + 1} of {onboardingSteps.length}
-              </p>
-              <p className="mt-2 text-base font-semibold text-foreground">{onboardingSteps[onboardingStepIndex].title}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{onboardingSteps[onboardingStepIndex].detail}</p>
-            </div>
-
-            <div className="grid gap-2 md:grid-cols-3">
-              {onboardingSteps.map((step, index) => (
-                <button
-                  key={step.id}
-                  type="button"
-                  onClick={() => setOnboardingStepIndex(index)}
-                  className={`rounded-lg border px-3 py-2 text-left ${index === onboardingStepIndex ? "border-primary/40 bg-primary/10" : "border-border/40 bg-card"}`}
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">{step.id}</p>
-                  <p className="mt-1 text-xs font-medium text-foreground">{step.title}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={completeOnboarding}>Skip Tour</Button>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                disabled={onboardingStepIndex === 0}
-                onClick={() => setOnboardingStepIndex((prev) => Math.max(0, prev - 1))}
-              >
-                Back
-              </Button>
-              {onboardingStepIndex === onboardingSteps.length - 1 ? (
-                <Button onClick={completeOnboarding} className="gap-1.5">
-                  <CheckCircle2 className="h-4 w-4" /> Finish
-                </Button>
-              ) : (
-                <Button onClick={() => setOnboardingStepIndex((prev) => Math.min(onboardingSteps.length - 1, prev + 1))}>
-                  Next
-                </Button>
-              )}
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
         <CommandInput placeholder="Search pages and actions..." />

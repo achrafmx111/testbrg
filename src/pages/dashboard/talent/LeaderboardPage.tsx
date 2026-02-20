@@ -48,7 +48,7 @@ export default function LeaderboardPage() {
                 </Card>
 
                 {/* 1st Place */}
-                <Card className="order-1 md:order-2 border-yellow-200 bg-gradient-to-b from-yellow-50 to-white shadow-lg z-10">
+                <Card className="order-1 md:order-2 border-secondary/20 bg-gradient-to-b from-secondary/10 to-card shadow-lg z-10">
                     <CardHeader className="text-center pb-2">
                         <Crown className="h-8 w-8 text-yellow-500 mx-auto" />
                     </CardHeader>
@@ -97,7 +97,7 @@ export default function LeaderboardPage() {
                         {LEADERBOARD_DATA.slice(3).map((user) => (
                             <div
                                 key={user.rank}
-                                className={`flex items-center justify-between p-3 rounded-lg transition-colors ${user.isUser ? "bg-indigo-50 border border-indigo-200" : "hover:bg-muted/50"}`}
+                                className={`flex items-center justify-between p-3 rounded-lg transition-colors ${user.isUser ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/50"}`}
                             >
                                 <div className="flex items-center gap-4">
                                     <span className="font-mono font-bold text-muted-foreground w-8 text-center">#{user.rank}</span>
