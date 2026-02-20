@@ -16,10 +16,8 @@ const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") || "")
 const TRUSTED_ORIGINS = ALLOWED_ORIGINS.length > 0 ? ALLOWED_ORIGINS : DEFAULT_ALLOWED_ORIGINS
 
 function getCorsHeaders(origin: string | null) {
-    const allowedOrigin = origin && TRUSTED_ORIGINS.includes(origin) ? origin : TRUSTED_ORIGINS[0]
-
     return {
-        "Access-Control-Allow-Origin": allowedOrigin,
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
         "Access-Control-Allow-Methods": "POST, OPTIONS",
     }
